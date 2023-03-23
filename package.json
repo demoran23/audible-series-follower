@@ -1,0 +1,41 @@
+{
+  "dependencies": {
+    "@crxjs/vite-plugin": "2.0.0-beta.9",
+    "@esbuild-plugins/node-globals-polyfill": "0.1.1",
+    "@suid/icons-material": "0.5.3",
+    "@suid/material": "0.8.2",
+    "@suid/vite-plugin": "0.1.0",
+    "@types/chrome": "0.0.204",
+    "@types/lodash": "4.14.191",
+    "@types/node": "18.11.17",
+    "@typescript-eslint/eslint-plugin": "5.46.1",
+    "@typescript-eslint/parser": "5.46.1",
+    "chrome-types": "0.1.155",
+    "date-fns": "2.29.3",
+    "eslint": "8.30.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-solid": "0.9.1",
+    "fast-xml-parser": "4.0.12",
+    "archiver": "5.3.1",
+    "linkedom": "0.14.21",
+    "lodash": "4.17.21",
+    "prettier": "2.8.1",
+    "solid-js": "1.6.5",
+    "typescript": "4.9.4",
+    "vite": "4.0.2",
+    "vite-plugin-solid": "2.5.0",
+    "vite-tsconfig-paths": "3.5.2"
+  },
+  "description": "A chrome extension to track your Audible listen history",
+  "license": "MIT",
+  "name": "audible-listen-history-tracker",
+  "proxy": "http://localhost:3000/",
+  "scripts": {
+    "start": "vite --host",
+    "serve": "vite preview",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint src/."
+  },
+  "type": "module",
+  "version": "0.0.1"
+}
