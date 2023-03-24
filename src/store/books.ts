@@ -8,6 +8,15 @@ export interface Book extends IType {
   listenDate: string;
   id: string;
   imageUrl: string;
+  link: string;
+  seriesId: string | undefined | null;
+  rating: number | undefined | null;
+  owned: boolean;
+}
+export interface Series extends IType {
+  id: string;
+  name: string;
+  bookIds: string[];
 }
 
 export interface BooksStore {
