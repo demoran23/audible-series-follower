@@ -10,8 +10,11 @@ export interface Book extends IType {
   imageUrl: string;
   link: string;
   seriesId: string | undefined | null;
+  seriesName: string | undefined | null;
   rating: number | undefined | null;
   owned: boolean;
+  // iso date
+  releaseDate: string;
 }
 export interface Series extends IType {
   id: string;
