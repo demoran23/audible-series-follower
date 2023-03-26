@@ -2,12 +2,15 @@ import { trim } from 'lodash';
 import { Book } from 'store/books';
 import { DOMParser } from 'linkedom';
 import { parse as parseDate } from 'date-fns';
-import { uniq, uniqBy, flatten } from 'lodash';
 
 const parser = new DOMParser();
-export const getOwnedBooks = async (): Promise<Book[]> => {
-  console.log('getLibraryBooks');
-  const res = await fetch('https://www.audible.com/library/titles');
+export interface OwnedBooksResult {
+  nextUrl: string;
+  isNextEnabled: boolean;
+  books: Book[];
+}
+export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
+  const res = await fetch(url);
   const html = await res.text();
   const document = parser.parseFromString(html, 'text/html');
   const rows = document.querySelectorAll(
@@ -17,23 +20,27 @@ export const getOwnedBooks = async (): Promise<Book[]> => {
   const books = rows.map(extractOwnedBook);
   const owned = books.filter((b) => b) as Book[];
 
-  for (const book of owned) book.owned = true;
+  const nextButton = document.querySelector("span[class*='nextButton']");
 
-  const seriesAsins = uniq(owned.map((b) => b.seriesId)) as string[];
-  console.log({ books: owned.length, series: seriesAsins.length });
-  const seriesBooks = await Promise.all(seriesAsins.map(getSeriesBooks));
-  console.log('seriesBooks', seriesBooks);
-  return uniqBy(flatten([...owned, ...seriesBooks]), 'id');
+  return {
+    isNextEnabled: !/bc-button-disabled/.test(nextButton.className),
+    nextUrl: nextButton.querySelector('a').getAttribute('href'),
+    books: owned,
+  };
 };
 
 function extractOwnedBook(element: HTMLElement): Book | null {
   const book: Partial<Book> = {};
+  book.status = 'owned';
 
-  book.id = element
-    .querySelector("div[asin][class*='bc-rating-stars']")!
-    .getAttribute('asin')!;
-  if (book.id === 'id') return null;
-
+  const id = element
+    .querySelector("div[asin][class*='bc-rating-stars']")
+    ?.getAttribute('asin');
+  if (!id || id === 'id') {
+    console.warn('MISSING ASIN for book:', element);
+    return null;
+  }
+  book.id = id;
   book.title = trim(
     element.querySelector<HTMLDivElement>(
       "a[class*='bc-link'] span[class*='bc-size-headline3']",
@@ -68,7 +75,7 @@ function extractOwnedBook(element: HTMLElement): Book | null {
 }
 
 export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
-  console.log('getLibraryBooks');
+  console.log('get series books', asin);
   const res = await fetch(`https://www.audible.com/series/${asin}`);
   const html = await res.text();
   const document = parser.parseFromString(html, 'text/html');
@@ -77,13 +84,14 @@ export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   );
 
   const books = rows.map(extractSeriesBook).filter((b) => b) as Book[];
-
   for (const book of books) {
     book.seriesId = asin;
     book.seriesName = trim(
       document.querySelector("h1[class*='bc-heading']")!.innerText,
     );
   }
+
+  console.log('series books', asin, books);
 
   return books;
 };
@@ -116,9 +124,32 @@ function extractSeriesBook(element: HTMLElement): Book | null {
     ).toISOString();
   }
 
-  book.owned = !!element.querySelector(
-    "span[class*='adblBuyBoxInLibraryButton']",
-  );
+  if (element.querySelector('span:not(.bc-hidden).adblBuyBoxInLibraryButton')) {
+    book.status = 'owned';
+  } else if (
+    /in wish list/i.test(
+      element.querySelector<HTMLElement>(
+        'span:not(.bc-hidden).adblGoToWishlistButton',
+      )?.innerText || '',
+    )
+  ) {
+    console.log(
+      'wishlisted',
+      element.querySelector<HTMLElement>(
+        'span:not(.bc-hidden).adblGoToWishlistButton',
+      )?.innerText,
+    );
+    book.status = 'wishlisted';
+  } else if (
+    /in your pre-orders/i.test(
+      element.querySelector<HTMLElement>(
+        'span:not(.bc-hidden).adblBuyBoxPreorderButton',
+      )?.innerText || '',
+    )
+  ) {
+    book.status = 'preordered';
+  }
+
   book.imageUrl = element
     .querySelector<HTMLElement>('picture img')!
     .getAttribute('src')!;

@@ -17,9 +17,9 @@ export interface BookCardProps {
   book: Book;
 }
 export const BookCard: Component<BookCardProps> = ({ book }) => {
-  const ago =
-    book.listenDate &&
-    formatDistance(new Date(book.listenDate), Date.now(), {
+  const releasesIn =
+    book.releaseDate &&
+    formatDistance(new Date(book.releaseDate), Date.now(), {
       addSuffix: true,
     });
   return (
@@ -39,7 +39,8 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
         >
           {book.title}
         </Typography>
-        <Typography variant={'body2'}>{ago}</Typography>
+        <Typography variant={'body2'}>{releasesIn}</Typography>
+        <Typography variant={'body2'}>status: {book.status}</Typography>
       </CardContent>
     </Card>
   );

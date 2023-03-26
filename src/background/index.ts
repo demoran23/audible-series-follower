@@ -10,7 +10,11 @@ for (const onMessage of [
   }
 }
 
+// Refresh data every day
 chrome.alarms.create({ periodInMinutes: 60 * 24 });
+
+// Run when extension starts
+chrome.alarms.create({ when: Date.now() });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   refreshBooks().catch(console.error);

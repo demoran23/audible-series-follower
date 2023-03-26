@@ -5,7 +5,7 @@ import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
 
 export const BooksList: Component = () => {
-  const items = createMemo(() => orderBy(values(books), 'listenDate', 'desc'));
+  const items = createMemo(() => orderBy(values(books), 'releaseDate', 'desc'));
   return (
     <Box
       sx={{
