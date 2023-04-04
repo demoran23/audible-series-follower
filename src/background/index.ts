@@ -1,4 +1,9 @@
-import { onInitialize, onRefresh, refreshBooks } from 'background/onRefresh';
+import {
+  getBooksFromStorage,
+  onInitialize,
+  onRefresh,
+  refreshBooks,
+} from 'background/onRefresh';
 import { onShowApp } from 'background/onShowApp';
 
 for (const onMessage of [
@@ -17,6 +22,7 @@ chrome.alarms.create({ periodInMinutes: 60 * 24 });
 chrome.alarms.create({ when: Date.now() });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  refreshBooks().catch(console.error);
+  // refreshBooks().catch(console.error);
+  return getBooksFromStorage().catch(console.error);
   return true;
 });

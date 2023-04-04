@@ -3,9 +3,23 @@ import { BookCard } from 'components/BookCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
+import { series } from 'store/series';
 
 export const BooksList: Component = () => {
-  const items = createMemo(() => orderBy(values(books), 'releaseDate', 'desc'));
+  console.log('list', series, books);
+  const items = createMemo(
+    () =>
+      orderBy(
+        values(books)
+          .filter((b) => series[b.seriesId ?? '']?.following)
+          .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
+        ['releaseDate'],
+        'asc',
+      ),
+    [],
+    { name: 'book list items' },
+  );
+  console.log('items', items());
   return (
     <Box
       sx={{

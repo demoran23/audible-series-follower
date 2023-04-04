@@ -1,9 +1,8 @@
 import { createStore } from 'solid-js/store';
+import { IType } from 'store/IType';
 
-export interface IType {
+export interface Book extends IType<'book'> {
   type: 'book';
-}
-export interface Book extends IType {
   title: string;
   listenDate: string;
   id: string;
@@ -16,11 +15,6 @@ export interface Book extends IType {
 
   // iso date
   releaseDate: string;
-}
-export interface Series extends IType {
-  id: string;
-  name: string;
-  bookIds: string[];
 }
 
 export interface BooksStore {

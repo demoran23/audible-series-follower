@@ -1,7 +1,9 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
-import { flatten, keyBy, uniq, values, merge } from 'lodash';
+import { groupBy, keyBy, merge, uniq, values } from 'lodash';
 import { getOwnedBooks, getSeriesBooks } from 'services/audible';
-import { Book, IType } from 'store/books';
+import { Book } from 'store/books';
+import { IType } from 'store/IType';
+import { Series } from 'store/series';
 
 export const onRefresh: ExtensionMessageEventHandler = (
   msg,
@@ -27,7 +29,10 @@ export const onInitialize: ExtensionMessageEventHandler = (
 };
 
 export const refreshBooks = async () => {
-  const existing = await chrome.storage.local.get();
+  let existing = (await chrome.storage.local.get()) as {
+    [key: string]: Book | Series;
+  };
+
   // Get our owned books
   let shouldContinue = false;
   let url = new URL('https://www.audible.com/library/titles?pageSize=50');
@@ -45,17 +50,42 @@ export const refreshBooks = async () => {
     if (existing[result.books[result.books.length - 1].id]) break;
   } while (shouldContinue);
 
-  const items = keyBy(ownedBooks, 'id');
-  console.log('items:', Object.keys(items).length, items);
-  await chrome.storage.local.set(items);
+  await chrome.storage.local.set(keyBy(ownedBooks, 'id'));
+  existing = await chrome.storage.local.get();
+  const existingBooks = values(existing)
+    .filter((s) => s.type === 'book')
+    .filter((b) => (b as Book).seriesId) as Book[];
+
+  // Seed new series
+  const bookSeriesGroup = groupBy(existingBooks, 'seriesId');
+  console.log('bookseriesgroup', bookSeriesGroup);
+  for (const seriesId in bookSeriesGroup) {
+    // If we've already added this series, don't bother
+    if (existing[seriesId]) {
+      console.log('skipping', seriesId);
+      continue;
+    }
+
+    // Add new series
+    const group = bookSeriesGroup[seriesId];
+    const following = group
+      .filter((b) => b.rating)
+      .every((b) => Number(b.rating) >= 4);
+    const series: Series = {
+      type: 'series',
+      bookIds: group.map((b) => b.id),
+      id: seriesId,
+      following,
+      name: group[0].seriesName!,
+    };
+    await chrome.storage.local.set({ [seriesId]: series });
+  }
 
   // Get the series books
-  const seriesAsins = uniq([
-    ...ownedBooks.map((b) => b.seriesId),
-    ...Object.values(existing)
-      .filter((b) => b.type === 'book')
-      .map((b) => b.seriesId),
-  ]).filter((a) => a) as string[];
+  const seriesAsins = values(existing)
+    .filter((b) => b.type === 'series')
+    .filter((b) => (b as Series).following)
+    .map((b) => b.id);
 
   console.log('seriesAsins', seriesAsins);
 
@@ -75,9 +105,13 @@ export const refreshBooks = async () => {
 export const getBooksFromStorage = async () => {
   const sync = await chrome.storage.local.get(null);
   const books = keyBy(
-    values(sync).filter((t: IType) => t.type === 'book'),
+    values(sync).filter((t: IType<'book'>) => t.type === 'book'),
     'id',
   );
-  console.log('SYNC', sync, books);
-  return books;
+  const series = keyBy(
+    values(sync).filter((t: IType<'series'>) => t.type === 'series'),
+    'id',
+  );
+  console.log('SYNC', sync, books, series);
+  return { books, series };
 };
