@@ -89,7 +89,9 @@ export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
       "div[data-widget='productList'] li[class*='productListItem']",
     );
 
-    const books = rows.map(extractSeriesBook).filter((b) => b) as Book[];
+    const books = (await Promise.all(rows.map(extractSeriesBook))).filter(
+      (b) => b,
+    ) as Book[];
     for (const book of books) {
       book.seriesId = asin;
       book.seriesName = trim(
@@ -106,7 +108,7 @@ export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   }
 };
 
-function extractSeriesBook(element: HTMLElement): Book | null {
+async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   const book: Partial<Book> = {};
 
   const id = element.querySelector('div[data-asin]')?.getAttribute('data-asin');
@@ -165,6 +167,12 @@ function extractSeriesBook(element: HTMLElement): Book | null {
     .getAttribute('src')!;
 
   book.type = 'book';
+
+  // Get the rating for existing books
+  const existing = await chrome.storage.local.get(book.id);
+  if (existing) {
+    book.rating = existing.rating;
+  }
 
   return book as Book;
 }

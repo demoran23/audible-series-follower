@@ -43,18 +43,14 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
     formatDistance(new Date(book.releaseDate), Date.now(), {
       // addSuffix: true,
     });
-  const [isFollowing, setIsFollowing] = createSignal(
-    !!series[book.seriesId!]?.following,
-  );
+  const bookSeries = series[book.seriesId!];
+  const isFollowing = !!bookSeries?.following;
   const onFavoriteClick: SwitchBaseProps['onChange'] = (e, checked) => {
-    console.log('click', { isFollowing: isFollowing(), e, checked });
+    console.log('click', { isFollowing: isFollowing, e, checked });
 
     setSeries(
       produce((store) => {
-        const s = store[book.seriesId!];
-        setIsFollowing(!s.following);
-        s.following = !s.following;
-        store[book.seriesId!] = s;
+        store[book.seriesId!].following = checked;
       }),
     );
   };
@@ -104,7 +100,7 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
             <Chip label={book.status} />
           </Show>
           <Checkbox
-            checked={isFollowing()}
+            checked={isFollowing}
             onChange={onFavoriteClick}
             icon={<FavoriteBorder />}
             checkedIcon={<Favorite />}

@@ -6,7 +6,7 @@ export interface Series extends IType<'series'> {
   id: string;
   name: string;
   bookIds: string[];
-  following: boolean;
+  following: boolean | undefined;
   type: 'series';
 }
 

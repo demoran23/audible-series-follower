@@ -1,9 +1,10 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
-import { groupBy, keyBy, merge, uniq, values } from 'lodash';
+import { chunk, flatten, groupBy, keyBy, merge, uniq, values } from 'lodash';
 import { getOwnedBooks, getSeriesBooks } from 'services/audible';
 import { Book } from 'store/books';
 import { IType } from 'store/IType';
 import { Series } from 'store/series';
+import { addYears, isAfter, subYears } from 'date-fns';
 
 export const onRefresh: ExtensionMessageEventHandler = (
   msg,
@@ -68,34 +69,80 @@ export const refreshBooks = async () => {
 
     // Add new series
     const group = bookSeriesGroup[seriesId];
-    const following = group
-      .filter((b) => b.rating)
-      .every((b) => Number(b.rating) >= 4);
     const series: Series = {
       type: 'series',
       bookIds: group.map((b) => b.id),
       id: seriesId,
-      following,
+      following: undefined,
       name: group[0].seriesName!,
     };
     await chrome.storage.local.set({ [seriesId]: series });
   }
 
   // Get the series books
+  existing = await chrome.storage.local.get();
   const seriesAsins = values(existing)
     .filter((b) => b.type === 'series')
-    .filter((b) => (b as Series).following)
+    .filter((b) => [true, undefined].includes((b as Series).following))
     .map((b) => b.id);
 
   console.log('seriesAsins', seriesAsins);
+  const chunks = chunk(seriesAsins, 10);
+  for (const chunk of chunks) {
+    const results = await Promise.allSettled(chunk.map(getSeriesBooks));
+    const seriesBooksList = results
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => (r as any).value);
 
-  for (const asin of seriesAsins) {
-    const books = await getSeriesBooks(asin);
+    for (const seriesBooks of seriesBooksList as Book[][]) {
+      if (!seriesBooks.some(Boolean)) {
+        continue;
+      }
+      const series = existing[seriesBooks[0]?.seriesId ?? ''] as
+        | Series
+        | undefined;
+      // If our series doesn't know whether it should auto-follow or not
+      if (series && series.following === undefined) {
+        const autoFollowYearThreshold = 5;
+        const stringified = JSON.stringify(seriesBooks);
+        const materialized = JSON.parse(stringified);
+        const ratings = seriesBooks.map((b) => b.rating);
+        const books = seriesBooks
+          .map((b) => merge({}, existing[b.id], b))
+          .filter((b) => b.rating)
+          .filter((b) => b.releaseDate);
+        const following = books
+          .filter(
+            (b) =>
+              new Date(b.releaseDate) >
+              subYears(new Date(), autoFollowYearThreshold),
+          )
+          .some((b) => b.rating! >= 4);
+        console.log('following', seriesBooks[0]?.seriesName, {
+          following,
+          seriesBooks,
+          books,
+          ratings,
+          materialized,
+          stringified,
+          seriesBooksList,
+        });
+        // Auto-follow
+        await chrome.storage.local.set({
+          [series.id]: {
+            ...series,
+            name: seriesBooks[0]?.seriesName,
+            following,
+          },
+        });
+      }
+    }
+
     const obj = keyBy(
-      books.map((b) => merge(b, existing[b.id])),
+      flatten(seriesBooksList).map((b) => merge({}, b, existing[b.id])),
       'id',
     );
-    console.log('setting', asin, obj);
+    console.log('setting', chunk, obj);
     await chrome.storage.local.set(obj);
   }
 

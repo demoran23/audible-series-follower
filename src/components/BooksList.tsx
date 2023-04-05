@@ -10,9 +10,8 @@ export const BooksList: Component = () => {
   const items = createMemo(
     () =>
       orderBy(
-        values(books)
-          .filter((b) => series[b.seriesId ?? '']?.following)
-          .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
+        values(books).filter((b) => series[b.seriesId ?? '']?.following),
+        // .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
         ['releaseDate'],
         'asc',
       ),

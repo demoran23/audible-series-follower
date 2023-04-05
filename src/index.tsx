@@ -22,8 +22,8 @@ render(
 setTimeout(() => {
   chrome.runtime.sendMessage({ type: 'initialize' }, (res) => {
     console.log('INIT', res);
-    setBooks(res.books);
     setSeries(res.series);
+    setBooks(res.books);
   });
   // chrome.runtime.sendMessage({ type: 'refresh' }, (res: BooksStore) => {
   //   console.log('REFRESH', res);
