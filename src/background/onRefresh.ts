@@ -2,6 +2,7 @@ import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHa
 import { subYears } from 'date-fns';
 import { chunk, flatten, groupBy, keyBy, merge, values } from 'lodash';
 import { getOwnedBooks, getSeriesBooks } from 'services/audible';
+import { getOptions } from 'services/options';
 import { Book } from 'store/books';
 import { IType } from 'store/IType';
 import { Series } from 'store/series';
@@ -33,10 +34,10 @@ export const refreshBooks = async () => {
   let existing = (await chrome.storage.local.get()) as {
     [key: string]: Book | Series;
   };
-
+  const options = await getOptions();
   // Get our owned books
   let shouldContinue = false;
-  let url = new URL('https://www.audible.com/library/titles?pageSize=50');
+  let url = new URL(`${options.audibleBaseUrl}/library/titles?pageSize=50`);
 
   const ownedBooks: Book[] = [];
   do {

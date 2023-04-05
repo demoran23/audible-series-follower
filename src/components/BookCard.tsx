@@ -1,17 +1,7 @@
+import { Favorite, FavoriteBorder } from '@suid/icons-material';
 import {
-  Favorite,
-  FavoriteBorder,
-  FavoriteOutlined,
-  Image,
-} from '@suid/icons-material';
-import {
-  Box,
-  Button,
   Card,
-  CardActionArea,
-  CardActions,
   CardContent,
-  CardHeader,
   CardMedia,
   Checkbox,
   Chip,
@@ -19,14 +9,8 @@ import {
   Typography,
 } from '@suid/material';
 import { SwitchBaseProps } from '@suid/material/internal/SwitchBaseProps';
-import {
-  Component,
-  createMemo,
-  createSignal,
-  Match,
-  Show,
-  Switch,
-} from 'solid-js';
+import { getOptions } from 'services/options';
+import { Component, createResource, Show } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { Book } from 'store/books';
 import { formatDistance } from 'date-fns';
@@ -45,9 +29,8 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
     });
   const bookSeries = series[book.seriesId!];
   const isFollowing = !!bookSeries?.following;
+  const [options] = createResource(getOptions);
   const onFavoriteClick: SwitchBaseProps['onChange'] = (e, checked) => {
-    console.log('click', { isFollowing: isFollowing, e, checked });
-
     setSeries(
       produce((store) => {
         store[book.seriesId!].following = checked;
@@ -63,21 +46,26 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
       }}
     >
       <CardContent sx={{ flex: '1 0 auto' }}>
-        <CardMedia
-          component="img"
-          sx={{ maxWidth: width }}
-          image={book.imageUrl}
-          alt={book.title}
-        />
-
-        <Typography
-          variant="subtitle1"
-          title={book.title}
-          noWrap
-          sx={{ inlineSize: width, fontWeight: 'bold' }}
+        <a
+          href={`${options()?.audibleBaseUrl}/pd/${book.id}`}
+          target={'_blank'}
         >
-          {book.title}
-        </Typography>
+          <CardMedia
+            component="img"
+            sx={{ maxWidth: width }}
+            image={book.imageUrl}
+            alt={book.title}
+          />
+          <Typography
+            variant="subtitle1"
+            title={book.title}
+            noWrap
+            sx={{ inlineSize: width, fontWeight: 'bold' }}
+          >
+            {book.title}
+          </Typography>
+        </a>
+
         <Typography variant={'body2'}>{releasesIn}</Typography>
 
         <Show when={book.seriesName}>

@@ -1,4 +1,5 @@
 import { trim } from 'lodash';
+import { getOptions } from 'services/options';
 import { Book } from 'store/books';
 import { DOMParser } from 'linkedom';
 import { parse as parseDate } from 'date-fns';
@@ -76,38 +77,44 @@ function extractOwnedBook(element: HTMLElement): Book | null {
 
 export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   try {
-    console.log('get series books', asin);
-    // if (asin === 'B09MZKWFTB') debugger;
-    const res = await fetch(`https://www.audible.com/series/${asin}`);
+    const options = await getOptions();
+    const res = await fetch(`${options.audibleBaseUrl}/series/${asin}`);
     if (res.status >= 300) {
       console.warn('FAILED to fetch series', asin);
       return [];
     }
     const html = await res.text();
     const document = parser.parseFromString(html, 'text/html');
-    const rows = document.querySelectorAll(
-      "div[data-widget='productList'] li[class*='productListItem']",
-    );
-
-    const books = (await Promise.all(rows.map(extractSeriesBook))).filter(
-      (b) => b,
-    ) as Book[];
-    for (const book of books) {
-      book.seriesId = asin;
-      book.seriesName = trim(
-        document.querySelector("h1[class*='bc-heading']")!.innerText,
-      );
-    }
-
-    console.log('series books', asin, books);
-
-    return books;
+    return getSeriesBooksFromDocument(asin, document as unknown as Document);
   } catch (e) {
     console.warn('Error with asin', asin, e);
     throw e;
   }
 };
 
+export async function getSeriesBooksFromDocument(
+  asin: string,
+  document: Document,
+) {
+  const rows = [
+    ...document.querySelectorAll<HTMLElement>(
+      "div[data-widget='productList'] li[class*='productListItem']",
+    ),
+  ];
+  const books = (
+    await Promise.all(rows.map((e) => extractSeriesBook(e)))
+  ).filter((b) => b) as Book[];
+  for (const book of books) {
+    book.seriesId = asin;
+    book.seriesName = trim(
+      document.querySelector<HTMLElement>("h1[class*='bc-heading']")!.innerText,
+    );
+  }
+
+  console.log('series books', asin, books);
+
+  return books;
+}
 async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   const book: Partial<Book> = {};
 
@@ -145,12 +152,6 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
       )?.innerText || '',
     )
   ) {
-    console.log(
-      'wishlisted',
-      element.querySelector<HTMLElement>(
-        'span:not(.bc-hidden).adblGoToWishlistButton',
-      )?.innerText,
-    );
     book.status = 'wishlisted';
   } else if (
     /in your pre-orders/i.test(

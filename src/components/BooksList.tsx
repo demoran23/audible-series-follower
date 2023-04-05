@@ -1,4 +1,4 @@
-import { Box, List, Stack } from '@suid/material';
+import { Box } from '@suid/material';
 import { BookCard } from 'components/BookCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
@@ -6,7 +6,6 @@ import { books } from 'store/books';
 import { series } from 'store/series';
 
 export const BooksList: Component = () => {
-  console.log('list', series, books);
   const items = createMemo(
     () =>
       orderBy(
@@ -19,7 +18,7 @@ export const BooksList: Component = () => {
     [],
     { name: 'book list items' },
   );
-  console.log('items', items());
+
   return (
     <Box
       sx={{

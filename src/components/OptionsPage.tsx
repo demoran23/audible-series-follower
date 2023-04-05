@@ -36,9 +36,9 @@ export const OptionsPage: Component = () => {
         >
           <Stack spacing={2}>
             <TextField
-              id="stub"
-              label="Stub"
-              value={options()?.stub}
+              id="audibleBaseUrl"
+              label="Audible Base Url"
+              value={options()?.audibleBaseUrl}
               onChange={onChange}
             />
           </Stack>

@@ -32,8 +32,9 @@ export default defineManifest(async (env) => ({
     '32': 'favicon-32x32.png',
     '128': 'favicon-32x32.png',
   },
-  permissions: ['storage', 'alarms'],
   manifest_version: 3,
   name: 'Audible Series Follower',
+  options_page: 'options_page.html',
+  permissions: ['storage', 'alarms'],
   version: '1.0',
 }));

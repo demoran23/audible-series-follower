@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { ThemeProvider } from '@suid/material';
 import { render } from 'solid-js/web';
-import { BooksStore, setBooks } from 'store/books';
+import { setBooks } from 'store/books';
 import { setSeries } from 'store/series';
 import { theme } from 'theme';
 import App from './App';

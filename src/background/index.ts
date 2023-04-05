@@ -1,9 +1,4 @@
-import {
-  getBooksFromStorage,
-  onInitialize,
-  onRefresh,
-  refreshBooks,
-} from 'background/onRefresh';
+import { onInitialize, onRefresh, refreshBooks } from 'background/onRefresh';
 import { onShowApp } from 'background/onShowApp';
 
 for (const onMessage of [
