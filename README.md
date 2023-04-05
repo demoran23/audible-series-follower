@@ -1,27 +1,25 @@
 # What does it do?
 ![store 1](src/assets/store1.png)
 
-A chrome extension to keep track of your listen history on Audible.
+A chrome extension to allow you to follow series you like on Audible.
+  
+This extension will let you see what's upcoming for your followed series.
 
-Audible only tracks a couple of months worth of listen history.  
-This extension will extend that time frame to indefinitely, but it can only work
-with the data it has.
+It will occasionally poll each of your followed series to update its list.
 
-It will occasionally poll Audible's [listen history page](https://www.audible.com/account/listen-history) 
-to update its list.
+On each series page in Audible, you will be able to follow or unfollow the series by clicking the heart icon:
 
-On this listen history page in Audible, you see your full history by clicking on the infinity icon:
+![listen history infinity](src/assets/store2.png)
 
-![listen history infinity](src/assets/listen-history-infinity.png)
-
-You can also open this in a popup by clicking on the extension icon ![extension icon](favicon-16x16.png) in your browser.
+# Options
+You can set the Audible base url (eg https://www.audible.com) in the extension options.
 
 # How does it work?
 
-Every 24 hours, the extension will attempt to get the listen history page from Audible without doing any extra authentication.
+Every 24 hours, the extension will attempt to get the series information from Audible without doing any extra authentication.
 This means that if you aren't signed in to Audible, or if you can't access that page, it won't work.
 
-It then parses the data from that page and tracks them all as a `Book`.  The extension page shows these books in card form.
+It then parses the data from that page and tracks them all as books and series.  The extension page shows these books in card form.
 
 ## Tech stack
 * [Solid](http://solidjs.com): Front end framework
