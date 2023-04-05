@@ -1,5 +1,6 @@
 import { onInitialize, onRefresh, refreshBooks } from 'background/onRefresh';
 import { onShowApp } from 'background/onShowApp';
+import { getOptions } from 'services/options';
 
 for (const onMessage of [
   chrome.runtime.onMessageExternal,
@@ -18,6 +19,11 @@ chrome.alarms.create({ when: Date.now() });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   refreshBooks().catch(console.error);
-  // return getBooksFromStorage().catch(console.error);
   return true;
+});
+
+chrome.notifications.onClicked.addListener((id) => {
+  getOptions().then((o) => {
+    chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${id}` });
+  });
 });

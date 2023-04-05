@@ -35,6 +35,6 @@ export default defineManifest(async (env) => ({
   manifest_version: 3,
   name: 'Audible Series Follower',
   options_page: 'options_page.html',
-  permissions: ['storage', 'alarms'],
+  permissions: ['storage', 'alarms', 'notifications', 'tabs'],
   version: '1.0',
 }));

@@ -1,6 +1,15 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
 import { subYears } from 'date-fns';
-import { chunk, flatten, groupBy, keyBy, merge, values } from 'lodash';
+import {
+  chunk,
+  flatten,
+  groupBy,
+  keyBy,
+  keys,
+  merge,
+  omit,
+  values,
+} from 'lodash';
 import { getOwnedBooks, getSeriesBooks } from 'services/audible';
 import { getOptions } from 'services/options';
 import { Book } from 'store/books';
@@ -55,6 +64,7 @@ export const refreshBooks = async () => {
   await chrome.storage.local.set(keyBy(ownedBooks, 'id'));
   existing = await chrome.storage.local.get();
   const existingBooks = values(existing)
+    .filter(Boolean)
     .filter((s) => s.type === 'book')
     .filter((b) => (b as Book).seriesId) as Book[];
 
@@ -81,6 +91,7 @@ export const refreshBooks = async () => {
   // Get the series books
   existing = await chrome.storage.local.get();
   const seriesAsins = values(existing)
+    .filter(Boolean)
     .filter((b) => b.type === 'series')
     .filter((b) => [true, undefined].includes((b as Series).following))
     .map((b) => b.id);
@@ -124,11 +135,35 @@ export const refreshBooks = async () => {
       }
     }
 
-    const obj = keyBy(
+    const seriesBooks = keyBy(
       flatten(seriesBooksList).map((b) => merge({}, b, existing[b.id])),
       'id',
     );
-    await chrome.storage.local.set(obj);
+
+    const newlySeenBooks = omit(
+      seriesBooks,
+      values(existing)
+        .filter(Boolean)
+        .map((b) => b.id),
+    );
+    for (const book of values(newlySeenBooks as Book[])
+      .filter(Boolean)
+      .filter((b) => new Date() < new Date(b.releaseDate))) {
+      console.log('new book notification', book);
+      chrome.notifications.create(
+        book.id,
+        {
+          type: 'basic',
+          title: `A new audiobook is available in the ${book.seriesName} series.`,
+          iconUrl: `${book.imageUrl}`,
+          message: `${book.title}`,
+        },
+        (id) =>
+          console.log('created notification', id, chrome.runtime.lastError),
+      );
+    }
+
+    await chrome.storage.local.set(seriesBooks);
   }
 
   return await getBooksFromStorage();
