@@ -1,10 +1,10 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
-import { chunk, flatten, groupBy, keyBy, merge, uniq, values } from 'lodash';
+import { subYears } from 'date-fns';
+import { chunk, flatten, groupBy, keyBy, merge, values } from 'lodash';
 import { getOwnedBooks, getSeriesBooks } from 'services/audible';
 import { Book } from 'store/books';
 import { IType } from 'store/IType';
 import { Series } from 'store/series';
-import { addYears, isAfter, subYears } from 'date-fns';
 
 export const onRefresh: ExtensionMessageEventHandler = (
   msg,
@@ -59,11 +59,9 @@ export const refreshBooks = async () => {
 
   // Seed new series
   const bookSeriesGroup = groupBy(existingBooks, 'seriesId');
-  console.log('bookseriesgroup', bookSeriesGroup);
   for (const seriesId in bookSeriesGroup) {
     // If we've already added this series, don't bother
     if (existing[seriesId]) {
-      console.log('skipping', seriesId);
       continue;
     }
 
@@ -86,7 +84,6 @@ export const refreshBooks = async () => {
     .filter((b) => [true, undefined].includes((b as Series).following))
     .map((b) => b.id);
 
-  console.log('seriesAsins', seriesAsins);
   const chunks = chunk(seriesAsins, 10);
   for (const chunk of chunks) {
     const results = await Promise.allSettled(chunk.map(getSeriesBooks));
@@ -104,29 +101,17 @@ export const refreshBooks = async () => {
       // If our series doesn't know whether it should auto-follow or not
       if (series && series.following === undefined) {
         const autoFollowYearThreshold = 5;
-        const stringified = JSON.stringify(seriesBooks);
-        const materialized = JSON.parse(stringified);
-        const ratings = seriesBooks.map((b) => b.rating);
-        const books = seriesBooks
+        const following = seriesBooks
           .map((b) => merge({}, existing[b.id], b))
           .filter((b) => b.rating)
-          .filter((b) => b.releaseDate);
-        const following = books
+          .filter((b) => b.releaseDate)
           .filter(
             (b) =>
               new Date(b.releaseDate) >
               subYears(new Date(), autoFollowYearThreshold),
           )
           .some((b) => b.rating! >= 4);
-        console.log('following', seriesBooks[0]?.seriesName, {
-          following,
-          seriesBooks,
-          books,
-          ratings,
-          materialized,
-          stringified,
-          seriesBooksList,
-        });
+
         // Auto-follow
         await chrome.storage.local.set({
           [series.id]: {
@@ -142,7 +127,6 @@ export const refreshBooks = async () => {
       flatten(seriesBooksList).map((b) => merge({}, b, existing[b.id])),
       'id',
     );
-    console.log('setting', chunk, obj);
     await chrome.storage.local.set(obj);
   }
 
