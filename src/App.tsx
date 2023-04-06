@@ -1,4 +1,12 @@
-import { Button, ButtonGroup } from '@suid/material';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Container,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@suid/material';
 import { BooksPage } from 'components/BooksPage';
 import { SeriesPage } from 'components/SeriesPage';
 import { createSignal, Match, Switch } from 'solid-js';
@@ -8,13 +16,23 @@ type AppPage = 'upcoming' | 'followed' | 'others';
 
 const App: Component = () => {
   const [page, setPage] = createSignal<AppPage>('upcoming');
+
   return (
-    <div>
-      <ButtonGroup variant="text" aria-label="text button group">
-        <Button onClick={() => setPage('upcoming')}>Upcoming</Button>
-        <Button onClick={() => setPage('followed')}>Followed</Button>
-        <Button onClick={() => setPage('others')}>Others</Button>
-      </ButtonGroup>
+    <Container>
+      <Stack alignItems={'center'} position={'sticky'} top={4}>
+        <ToggleButtonGroup
+          color="primary"
+          value={page()}
+          exclusive
+          onChange={(event, value) => {
+            setPage(value);
+          }}
+        >
+          <ToggleButton value="upcoming">Upcoming</ToggleButton>
+          <ToggleButton value="followed">Followed</ToggleButton>
+          <ToggleButton value="others">Others</ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
       <Switch fallback={<BooksPage />}>
         <Match when={page() === 'followed'}>
           <SeriesPage following={true} />
@@ -23,7 +41,7 @@ const App: Component = () => {
           <SeriesPage following={false} />
         </Match>
       </Switch>
-    </div>
+    </Container>
   );
 };
 

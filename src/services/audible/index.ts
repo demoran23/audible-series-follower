@@ -1,5 +1,6 @@
 import { trim } from 'lodash';
 import { getOptions } from 'services/options';
+import { getBooksFromStorage } from 'services/storage';
 import { Book } from 'store/books';
 import { DOMParser } from 'linkedom';
 import { parse as parseDate } from 'date-fns';
@@ -96,11 +97,11 @@ export async function getSeriesBooksFromDocument(
   asin: string,
   document: Document,
 ) {
-  const rows = [
-    ...document.querySelectorAll<HTMLElement>(
-      "div[data-widget='productList'] li[class*='productListItem']",
-    ),
-  ];
+  const htmlElementNodeListOf = document.querySelectorAll<HTMLElement>(
+    "div[data-widget='productList'] li[class*='productListItem']",
+  );
+  const rows = [...htmlElementNodeListOf];
+  console.log(htmlElementNodeListOf);
   const books = (
     await Promise.all(rows.map((e) => extractSeriesBook(e)))
   ).filter((b) => b) as Book[];
@@ -178,7 +179,7 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   book.type = 'book';
 
   // Get the rating for existing books
-  const existing = await chrome.storage.local.get(book.id);
+  const existing = (await getBooksFromStorage([book.id]))[0];
   if (existing) {
     book.rating = existing.rating;
   }

@@ -1,4 +1,4 @@
-import { Favorite, FavoriteBorder } from '@suid/icons-material';
+import { Cancel, Favorite, FavoriteBorder } from '@suid/icons-material';
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import { Component, createResource, Show } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { Book } from 'store/books';
 import { formatDistance } from 'date-fns';
-import { series, setSeries } from 'store/series';
+import { followingStore, setFollowing } from 'store/following';
 
 export interface BookCardProps {
   book: Book;
@@ -27,11 +27,10 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
     formatDistance(new Date(book.releaseDate), Date.now(), {
       // addSuffix: true,
     });
-  const bookSeries = series[book.seriesId!];
-  const isFollowing = !!bookSeries?.following;
+  const isFollowing = !!followingStore[book.seriesId!]?.following;
   const [options] = createResource(getOptions);
-  const onFavoriteClick: SwitchBaseProps['onChange'] = (e, checked) => {
-    setSeries(
+  const onRemoveFollowClick: SwitchBaseProps['onChange'] = (e, checked) => {
+    setFollowing(
       produce((store) => {
         store[book.seriesId!].following = checked;
       }),
@@ -89,9 +88,9 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
           </Show>
           <Checkbox
             checked={isFollowing}
-            onChange={onFavoriteClick}
-            icon={<FavoriteBorder />}
-            checkedIcon={<Favorite />}
+            title={'Stop following this series'}
+            onChange={onRemoveFollowClick}
+            checkedIcon={<Cancel color={'error'} />}
           />
         </Stack>
       </CardContent>
