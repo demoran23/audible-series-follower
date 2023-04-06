@@ -4,6 +4,7 @@ import { SeriesCard } from 'components/SeriesCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
+import { followingStore } from 'store/following';
 import { series } from 'store/series';
 
 export const SeriesList: Component<{ following: boolean }> = (props) => {
@@ -12,14 +13,14 @@ export const SeriesList: Component<{ following: boolean }> = (props) => {
       orderBy(
         values(series)
           .filter(Boolean)
-          .filter((s) => s.following === props.following),
+          .filter(
+            (s) => !!followingStore[`${s.id}`]?.following === props.following,
+          ),
         ['name'],
         'asc',
       ),
     [],
-    { name: 'series list items' },
   );
-  console.log('SeriesList', items);
   return (
     <Box
       sx={{

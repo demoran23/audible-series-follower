@@ -3,17 +3,14 @@
 
 A chrome extension to allow you to follow series you like on Audible.
   
-This extension will let you see what's upcoming for your followed series.
-
-It will occasionally poll each of your followed series to update its list.
-
-On each series page in Audible, you will be able to follow or unfollow the series by clicking the heart icon:
-
-![heart icon](src/assets/store2.png)
+This extension will:
+* let you see what's upcoming for your followed series
+* occasionally poll each of your followed series to update its list 
+* provide a view for upcoming books, your followed series, and your other series
+* allow you to follow and unfollow a series on the Audible series page
+* notify you of new releases in your followed series
 
 New series will be automatically followed if they have a book within the past 5 years that you've rated 4+.
-
-Series can be unfollowed by clicking the heart button, and followed by visiting the series page on Audible.
 
 # Options
 You can set the Audible base url (eg https://www.audible.com) in the extension options.

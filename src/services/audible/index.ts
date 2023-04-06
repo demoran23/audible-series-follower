@@ -1,5 +1,6 @@
 import { trim } from 'lodash';
 import { getOptions } from 'services/options';
+import { getBooksFromStorage } from 'services/storage';
 import { Book } from 'store/books';
 import { DOMParser } from 'linkedom';
 import { parse as parseDate } from 'date-fns';
@@ -47,13 +48,15 @@ function extractOwnedBook(element: HTMLElement): Book | null {
       "a[class*='bc-link'] span[class*='bc-size-headline3']",
     )!.innerText,
   );
-  const seriesLink = element
-    .querySelector<HTMLElement>("li[class*=seriesLabel] a[class^='bc-link']")
-    ?.getAttribute('href');
+  const seriesAnchor = element.querySelector<HTMLElement>(
+    "li[class*=seriesLabel] a[class^='bc-link']",
+  );
+  const seriesLink = seriesAnchor?.getAttribute('href');
   if (seriesLink) {
     const matches = /series\/.+\/(\w+)\?/[Symbol.match](seriesLink);
     book.seriesId = matches![1];
   }
+  book.seriesName = trim(seriesAnchor?.innerText);
 
   const rating = element
     .querySelector<HTMLElement>(
@@ -78,7 +81,8 @@ function extractOwnedBook(element: HTMLElement): Book | null {
 export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   try {
     const options = await getOptions();
-    const res = await fetch(`${options.audibleBaseUrl}/series/${asin}`);
+    const url = `${options.audibleBaseUrl}/series/${asin}`;
+    const res = await fetch(url);
     if (res.status >= 300) {
       console.warn('FAILED to fetch series', asin);
       return [];
@@ -96,11 +100,10 @@ export async function getSeriesBooksFromDocument(
   asin: string,
   document: Document,
 ) {
-  const rows = [
-    ...document.querySelectorAll<HTMLElement>(
-      "div[data-widget='productList'] li[class*='productListItem']",
-    ),
-  ];
+  const htmlElementNodeListOf = document.querySelectorAll<HTMLElement>(
+    "div[data-widget='productList'] li[class*='productListItem']",
+  );
+  const rows = [...htmlElementNodeListOf];
   const books = (
     await Promise.all(rows.map((e) => extractSeriesBook(e)))
   ).filter((b) => b) as Book[];
@@ -110,8 +113,6 @@ export async function getSeriesBooksFromDocument(
       document.querySelector<HTMLElement>("h1[class*='bc-heading']")!.innerText,
     );
   }
-
-  console.log('series books', asin, books);
 
   return books;
 }
@@ -178,7 +179,7 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   book.type = 'book';
 
   // Get the rating for existing books
-  const existing = await chrome.storage.local.get(book.id);
+  const existing = (await getBooksFromStorage([book.id]))[0];
   if (existing) {
     book.rating = existing.rating;
   }

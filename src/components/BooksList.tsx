@@ -3,6 +3,7 @@ import { BookCard } from 'components/BookCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
+import { followingStore } from 'store/following';
 import { series } from 'store/series';
 
 export const BooksList: Component = () => {
@@ -10,13 +11,12 @@ export const BooksList: Component = () => {
     () =>
       orderBy(
         values(books)
-          .filter((b) => series[b.seriesId ?? '']?.following)
+          .filter((b) => followingStore[b.seriesId ?? '']?.following)
           .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
         ['releaseDate'],
         'asc',
       ),
     [],
-    { name: 'book list items' },
   );
 
   return (
