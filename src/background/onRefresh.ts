@@ -75,7 +75,7 @@ export const refreshBooks = async () => {
   const existingBooksWithSeries = storageBooks.filter(
     (b) => b.seriesId,
   ) as Book[];
-  const storageSeries = await getSeriesFromStorage();
+  let storageSeries = await getSeriesFromStorage();
   // Seed new series
   const bookSeriesGroup = groupBy(existingBooksWithSeries, 'seriesId');
   for (const seriesId in bookSeriesGroup) {
@@ -104,10 +104,13 @@ export const refreshBooks = async () => {
           // Series that are either followed or don't have a following set yet
           following.find((f) => f.seriesId === b.seriesId)?.following !== false,
       )
-      .map((b) => b.id),
+      .filter((b) => b.seriesId)
+      .map((b) => b.seriesId!)
+      .filter(Boolean),
   );
 
   const chunks = chunk(seriesAsins, 10);
+  storageSeries = await getSeriesFromStorage();
   for (const chunk of chunks) {
     const results = await Promise.allSettled(chunk.map(getSeriesBooks));
     const seriesBooksList = results
@@ -196,8 +199,8 @@ export interface Storage {
 }
 export const getStorage = async () => {
   const books = keyBy(await getBooksFromStorage(), 'id');
-  const series = keyBy(await getSeriesFromStorage(), 'id');
-  const following = keyBy(await getFollowingsFromStorage(), 'id');
+  const series = keyBy(await getSeriesFromStorage(), `id`);
+  const following = keyBy(await getFollowingsFromStorage(), 'seriesId');
 
   const result: Storage = { books, series, following };
   console.log('STORAGE', result);

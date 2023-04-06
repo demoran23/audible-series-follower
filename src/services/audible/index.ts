@@ -79,7 +79,9 @@ function extractOwnedBook(element: HTMLElement): Book | null {
 export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   try {
     const options = await getOptions();
-    const res = await fetch(`${options.audibleBaseUrl}/series/${asin}`);
+    const url = `${options.audibleBaseUrl}/series/${asin}`;
+    console.log('fetching', url);
+    const res = await fetch(url);
     if (res.status >= 300) {
       console.warn('FAILED to fetch series', asin);
       return [];
@@ -101,7 +103,6 @@ export async function getSeriesBooksFromDocument(
     "div[data-widget='productList'] li[class*='productListItem']",
   );
   const rows = [...htmlElementNodeListOf];
-  console.log(htmlElementNodeListOf);
   const books = (
     await Promise.all(rows.map((e) => extractSeriesBook(e)))
   ).filter((b) => b) as Book[];
@@ -112,7 +113,7 @@ export async function getSeriesBooksFromDocument(
     );
   }
 
-  console.log('series books', asin, books);
+  console.log('series books', books[0].seriesName, books);
 
   return books;
 }

@@ -8,17 +8,14 @@ import { followingStore } from 'store/following';
 import { series } from 'store/series';
 
 export const SeriesList: Component<{ following: boolean }> = (props) => {
-  const items = createMemo(
-    () =>
-      orderBy(
-        values(series)
-          .filter(Boolean)
-          .filter((s) => !!followingStore[s.id]?.following === props.following),
-        ['name'],
-        'asc',
+  const items = orderBy(
+    values(series)
+      .filter(Boolean)
+      .filter(
+        (s) => !!followingStore[`${s.id}`]?.following === props.following,
       ),
-    [],
-    { name: 'series list items' },
+    ['name'],
+    'asc',
   );
   console.log('SeriesList', items);
   return (
@@ -30,7 +27,7 @@ export const SeriesList: Component<{ following: boolean }> = (props) => {
         minWidth: 775,
       }}
     >
-      <For each={items()}>
+      <For each={items}>
         {(item, index) => <SeriesCard series={item} data-index={index()} />}
       </For>
     </Box>

@@ -7,17 +7,12 @@ import { followingStore } from 'store/following';
 import { series } from 'store/series';
 
 export const BooksList: Component = () => {
-  const items = createMemo(
-    () =>
-      orderBy(
-        values(books)
-          .filter((b) => followingStore[b.seriesId ?? '']?.following)
-          .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
-        ['releaseDate'],
-        'asc',
-      ),
-    [],
-    { name: 'book list items' },
+  const items = orderBy(
+    values(books)
+      .filter((b) => followingStore[b.seriesId ?? '']?.following)
+      .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
+    ['releaseDate'],
+    'asc',
   );
 
   return (
@@ -29,7 +24,7 @@ export const BooksList: Component = () => {
         minWidth: 775,
       }}
     >
-      <For each={items()}>
+      <For each={items}>
         {(item, index) => <BookCard book={item} data-index={index()} />}
       </For>
     </Box>
