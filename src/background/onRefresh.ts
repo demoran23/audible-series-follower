@@ -78,6 +78,7 @@ export const refreshBooks = async () => {
 
     // Add new series
     const group = bookSeriesGroup[seriesId];
+    console.log('GROUP', { seriesId, group });
     const series: Series = {
       type: 'series',
       bookIds: group.map((b) => b.id),
@@ -124,6 +125,12 @@ export const refreshBooks = async () => {
           )
           .some((b) => b.rating! >= 4);
 
+        console.log(
+          'Setting follow for series',
+          series.name,
+          following,
+          series,
+        );
         // Auto-follow
         await chrome.storage.local.set({
           [series.id]: {
@@ -149,18 +156,12 @@ export const refreshBooks = async () => {
     for (const book of values(newlySeenBooks as Book[])
       .filter(Boolean)
       .filter((b) => new Date() < new Date(b.releaseDate))) {
-      console.log('new book notification', book);
-      chrome.notifications.create(
-        book.id,
-        {
-          type: 'basic',
-          title: `A new audiobook is available in the ${book.seriesName} series.`,
-          iconUrl: `${book.imageUrl}`,
-          message: `${book.title}`,
-        },
-        (id) =>
-          console.log('created notification', id, chrome.runtime.lastError),
-      );
+      chrome.notifications.create(book.id, {
+        type: 'basic',
+        title: `A new audiobook is available in the ${book.seriesName} series.`,
+        iconUrl: `${book.imageUrl}`,
+        message: `${book.title}`,
+      });
     }
 
     await chrome.storage.local.set(seriesBooks);

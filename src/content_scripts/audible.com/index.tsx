@@ -37,6 +37,8 @@ if (parent) {
 
   if (!series) {
     const books = await getSeriesBooksFromDocument(asin, window.document);
+    console.log('BOOKS', { asin, books });
+
     series = {
       following: false,
       name: books[0].seriesName!,

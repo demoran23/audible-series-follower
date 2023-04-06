@@ -4,6 +4,7 @@ import { IType } from 'store/IType';
 export interface Book extends IType<'book'> {
   type: 'book';
   title: string;
+  number: number;
   listenDate: string;
   id: string;
   imageUrl: string;

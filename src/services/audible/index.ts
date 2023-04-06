@@ -127,6 +127,14 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
     element.querySelector<HTMLDivElement>("li h3[class*='bc-heading'] a")!
       .innerText,
   );
+  const bookNumberHeader =
+    element.querySelector<HTMLSpanElement>('div > div > h2.bc-heading')
+      ?.innerText ?? '';
+  const matches = /.*Book (\d+)/[Symbol.match](trim(bookNumberHeader));
+  if (matches) {
+    book.number = Number(matches[1]);
+  }
+
   book.link = element
     .querySelector<HTMLDivElement>("li h3[class*='bc-heading'] a")!
     .getAttribute('href')!;
