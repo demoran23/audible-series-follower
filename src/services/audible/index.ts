@@ -48,13 +48,15 @@ function extractOwnedBook(element: HTMLElement): Book | null {
       "a[class*='bc-link'] span[class*='bc-size-headline3']",
     )!.innerText,
   );
-  const seriesLink = element
-    .querySelector<HTMLElement>("li[class*=seriesLabel] a[class^='bc-link']")
-    ?.getAttribute('href');
+  const seriesAnchor = element.querySelector<HTMLElement>(
+    "li[class*=seriesLabel] a[class^='bc-link']",
+  );
+  const seriesLink = seriesAnchor?.getAttribute('href');
   if (seriesLink) {
     const matches = /series\/.+\/(\w+)\?/[Symbol.match](seriesLink);
     book.seriesId = matches![1];
   }
+  book.seriesName = trim(seriesAnchor?.innerText);
 
   const rating = element
     .querySelector<HTMLElement>(
@@ -80,7 +82,6 @@ export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   try {
     const options = await getOptions();
     const url = `${options.audibleBaseUrl}/series/${asin}`;
-    console.log('fetching', url);
     const res = await fetch(url);
     if (res.status >= 300) {
       console.warn('FAILED to fetch series', asin);
@@ -112,8 +113,6 @@ export async function getSeriesBooksFromDocument(
       document.querySelector<HTMLElement>("h1[class*='bc-heading']")!.innerText,
     );
   }
-
-  console.log('series books', books[0].seriesName, books);
 
   return books;
 }

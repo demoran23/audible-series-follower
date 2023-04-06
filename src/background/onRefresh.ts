@@ -148,13 +148,6 @@ export const refreshBooks = async () => {
           )
           .some((b) => b.rating! >= 4);
 
-        console.log(
-          'Setting follow for series',
-          series.name,
-          following,
-          series,
-        );
-
         // Auto-follow
         await setFollowingsInStorage([
           {
