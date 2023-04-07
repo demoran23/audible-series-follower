@@ -143,7 +143,7 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   const bookNumberHeader =
     element.querySelector<HTMLSpanElement>('div > div > h2.bc-heading')
       ?.innerText ?? '';
-  const matches = /.*Book (\d+)/[Symbol.match](trim(bookNumberHeader));
+  const matches = /.*Book ([\d.]+)/[Symbol.match](trim(bookNumberHeader));
   if (matches) {
     book.number = Number(matches[1]);
   }

@@ -82,52 +82,41 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
           <ToggleFollowButton series={series} />
         </Stack>
 
-        <Grid container width={'600px'} spacing={1}>
+        <Grid container width={'600px'} rowSpacing={1}>
           <For each={seriesBooks()}>
             {(book, index) => (
-              <Grid container data-index={index()} spacing={3}>
-                <Grid item xs={2}>
+              <Grid container data-index={index()} spacing={1}>
+                <Grid item xs={1}>
                   <Show when={book.rating}>
                     <Chip
                       icon={<Star sx={{ color: yellow[500] }} />}
                       size={'small'}
                       variant="outlined"
-                      label={book.rating}
+                      label={book.rating?.toFixed()}
                     ></Chip>
                   </Show>
                 </Grid>
                 <Grid item xs={1}>
                   <Show when={book.number !== undefined}>
-                    <Typography
-                      sx={{ display: 'flex', alignItems: 'center' }}
-                      variant={'body2'}
-                      noWrap
-                    >
-                      #{book.number}
+                    <Typography variant={'body2'} noWrap>
+                      # {book.number}
                     </Typography>
                   </Show>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography
-                    sx={{ display: 'flex', alignItems: 'center' }}
-                    variant={'body2'}
-                    noWrap
-                  >
+                  <Typography variant={'body2'} noWrap>
                     {book.status}
                   </Typography>
                 </Grid>
-                <Grid item xs={7}>
-                  <Typography
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                    variant={'body2'}
-                    noWrap
-                    title={book.title}
+                <Grid item xs={8}>
+                  <a
+                    href={`${options()?.audibleBaseUrl}/pd/${book.id}`}
+                    target={'_blank'}
                   >
-                    {book.title}
-                  </Typography>
+                    <Typography variant={'body2'} noWrap title={book.title}>
+                      {book.title}
+                    </Typography>
+                  </a>
                 </Grid>
               </Grid>
             )}

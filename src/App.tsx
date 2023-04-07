@@ -1,4 +1,5 @@
 import {
+  Box,
   Container,
   Stack,
   TextField,
@@ -20,7 +21,7 @@ const App: Component = () => {
     setTitleFilter(value);
   };
   return (
-    <Container>
+    <Box>
       <Stack
         direction={'row'}
         alignItems={'flex-start'}
@@ -60,7 +61,7 @@ const App: Component = () => {
           <SeriesPage following={false} />
         </Match>
       </Switch>
-    </Container>
+    </Box>
   );
 };
 
