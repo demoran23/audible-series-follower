@@ -30,7 +30,7 @@ export default defineManifest(async (env) => ({
   icons: {
     '16': 'favicon-16x16.png',
     '32': 'favicon-32x32.png',
-    '128': 'favicon-32x32.png',
+    '128': 'favicon-128x128.png',
   },
   manifest_version: 3,
   name: 'Audible Series Follower',
