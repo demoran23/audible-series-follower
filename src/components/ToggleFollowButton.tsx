@@ -1,17 +1,21 @@
 import { Button } from '@suid/material';
-import { Component } from 'solid-js';
+import { Component, createMemo } from 'solid-js';
 import { followingStore, setFollowing } from 'store/following';
 import { Series, setSeries } from 'store/series';
 
 export const ToggleFollowButton: Component<{ series: Series }> = ({
   series,
 }) => {
-  const isFollowing = !!followingStore[series.id]?.following;
+  const isFollowing = createMemo(
+    () => !!followingStore[series.id]?.following,
+    false,
+  );
   const onToggleFollowClick = () => {
+    console.log('following', series.name, !isFollowing());
     setFollowing({
       [series.id]: {
         seriesId: series.id,
-        following: !isFollowing,
+        following: !isFollowing(),
         type: 'following',
       },
     });
@@ -20,9 +24,9 @@ export const ToggleFollowButton: Component<{ series: Series }> = ({
     <Button
       onClick={onToggleFollowClick}
       variant={'outlined'}
-      color={isFollowing ? 'error' : undefined}
+      color={isFollowing() ? 'error' : undefined}
     >
-      {isFollowing ? 'Unfollow' : 'Follow'}
+      {isFollowing() ? 'Unfollow' : 'Follow'}
     </Button>
   );
 };

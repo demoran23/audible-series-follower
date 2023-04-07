@@ -1,15 +1,19 @@
+import { Star, Stars } from '@suid/icons-material';
 import {
   Button,
   Card,
   CardContent,
   CardMedia,
+  Chip,
+  Grid,
   Stack,
   Typography,
 } from '@suid/material';
+import { green } from '@suid/material/colors';
 import { ToggleFollowButton } from 'components/ToggleFollowButton';
 import { isArray, orderBy, values } from 'lodash';
 import { getOptions } from 'services/options';
-import { Component, createResource, createSignal, For } from 'solid-js';
+import { Component, createResource, createSignal, For, Show } from 'solid-js';
 import { Book, books } from 'store/books';
 import { Series } from 'store/series';
 
@@ -18,6 +22,10 @@ export interface SeriesCardProps {
 }
 const cardPadding = 16;
 const width = 800 - cardPadding * 2;
+const getStarColorFromRating = (rating: number | null | undefined): any => {
+  if (!rating) return 'black';
+  return { 5: 'green', 4: 'green', 3: 'yellow' }[rating] ?? 'black';
+};
 export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
   const [options] = createResource(getOptions);
   const [seriesBooks, setSeriesBooks] = createSignal<Book[]>([]);
@@ -75,15 +83,52 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
           <ToggleFollowButton series={series} />
         </Stack>
 
-        <Stack direction={'column'} width={'600px'}>
+        <Grid container width={'600px'} spacing={1}>
           <For each={seriesBooks()}>
             {(book, index) => (
-              <Typography variant={'body2'} noWrap data-index={index()}>
-                {book.number} - {book.title}
-              </Typography>
+              <Grid container data-index={index()}>
+                <Grid item xs={2}>
+                  <Show when={book.rating}>
+                    <Chip
+                      // color={getStarColorFromRating(book.rating)}
+                      icon={<Star />}
+                      label={book.rating}
+                    ></Chip>
+                  </Show>
+                </Grid>
+                <Grid item xs={1}>
+                  <Show when={book.number !== undefined}>
+                    <Typography
+                      sx={{ display: 'flex', alignItems: 'center' }}
+                      variant={'body2'}
+                      noWrap
+                    >
+                      #{book.number}
+                    </Typography>
+                  </Show>
+                </Grid>
+                <Grid item xs={2}>
+                  <Typography
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                    variant={'body2'}
+                    noWrap
+                  >
+                    {book.status}
+                  </Typography>
+                </Grid>
+                <Grid item xs={7}>
+                  <Typography
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                    variant={'body2'}
+                    noWrap
+                  >
+                    {book.title}
+                  </Typography>
+                </Grid>
+              </Grid>
             )}
           </For>
-        </Stack>
+        </Grid>
       </CardContent>
     </Card>
   );

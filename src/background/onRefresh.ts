@@ -111,6 +111,7 @@ export const refreshBooks = async () => {
 
   const chunks = chunk(seriesAsins, 10);
   storageSeries = await getSeriesFromStorage();
+  const newFollowings: Following[] = [];
   for (const chunk of chunks) {
     const results = await Promise.allSettled(chunk.map(getSeriesBooks));
     const seriesBooksList = results
@@ -118,12 +119,19 @@ export const refreshBooks = async () => {
       .map((r) => (r as any).value);
 
     for (const seriesBooks of seriesBooksList as Book[][]) {
-      if (!seriesBooks.some(Boolean)) {
-        continue;
-      }
       const series = storageSeries.find(
         (s) => s.id === seriesBooks[0]?.seriesId,
       ) as Series | undefined;
+
+      if (series) {
+        console.log('Updating series: ', series.name);
+        series.bookIds = seriesBooks.map((b) => b.id);
+        await setSeriesInStorage([series]);
+      }
+
+      if (!seriesBooks.some(Boolean)) {
+        continue;
+      }
 
       // If our series doesn't know whether it should auto-follow or not
       if (
@@ -149,13 +157,11 @@ export const refreshBooks = async () => {
           .some((b) => b.rating! >= 4);
 
         // Auto-follow
-        await setFollowingsInStorage([
-          {
-            seriesId: series.id,
-            following,
-            type: 'following',
-          },
-        ]);
+        newFollowings.push({
+          seriesId: series.id,
+          following,
+          type: 'following',
+        });
       }
     }
 
@@ -181,6 +187,8 @@ export const refreshBooks = async () => {
 
     await setBooksInStorage(values(seriesBooks));
   }
+
+  await setFollowingsInStorage(newFollowings);
 
   return await getStorage();
 };

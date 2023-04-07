@@ -6,7 +6,7 @@ import { Series } from 'store/series';
 export const getFollowingsFromStorage = async (
   seriesIds: string[] | undefined = undefined,
 ): Promise<Following[]> => {
-  const items = values(await chrome.storage.local.get())
+  const items = values(await chrome.storage.sync.get())
     .filter((i) => i.type === 'following')
     .filter(Boolean) as Following[];
   if (!seriesIds) return items;
@@ -15,7 +15,7 @@ export const getFollowingsFromStorage = async (
 
 export const setFollowingsInStorage = async (followings: Following[]) => {
   const items = keyBy(followings, (f) => `following:${f.seriesId}`);
-  return chrome.storage.local.set(items);
+  return chrome.storage.sync.set(items);
 };
 
 export const getBooksFromStorage = async (
