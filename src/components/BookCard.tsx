@@ -1,4 +1,4 @@
-import { Cancel, Favorite, FavoriteBorder } from '@suid/icons-material';
+import { Cancel } from '@suid/icons-material';
 import {
   Card,
   CardContent,

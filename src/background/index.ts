@@ -10,6 +10,17 @@ for (const onMessage of [
     onMessage.addListener(listener);
   }
 }
+chrome.notifications.onClicked.addListener((id) => {
+  console.log('handling notification by id', id);
+  getOptions().then((o) => {
+    if (id === 'login') {
+      chrome.tabs.create({ url: `${o.audibleBaseUrl}/library/titles` });
+    } else {
+      chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${id}` });
+    }
+  });
+  return true;
+});
 
 // Refresh data every day
 chrome.alarms.create({ periodInMinutes: 60 * 24 });
@@ -20,10 +31,4 @@ chrome.alarms.create({ when: Date.now() });
 chrome.alarms.onAlarm.addListener((alarm) => {
   refreshBooks().catch(console.error);
   return true;
-});
-
-chrome.notifications.onClicked.addListener((id) => {
-  getOptions().then((o) => {
-    chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${id}` });
-  });
 });

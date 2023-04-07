@@ -12,23 +12,35 @@ export interface OwnedBooksResult {
   books: Book[];
 }
 export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
-  const res = await fetch(url);
-  const html = await res.text();
-  const document = parser.parseFromString(html, 'text/html');
-  const rows = document.querySelectorAll(
-    "div[id='adbl-library-content-main'] > div[class='adbl-library-content-row']",
-  );
+  try {
+    const res = await fetch(url);
+    const html = await res.text();
+    const document = parser.parseFromString(html, 'text/html');
+    const rows = document.querySelectorAll(
+      "div[id='adbl-library-content-main'] > div[class='adbl-library-content-row']",
+    );
 
-  const books = rows.map(extractOwnedBook);
-  const owned = books.filter((b) => b) as Book[];
+    const books = rows.map(extractOwnedBook);
+    const owned = books.filter((b) => b) as Book[];
 
-  const nextButton = document.querySelector("span[class*='nextButton']");
+    const nextButton = document.querySelector("span[class*='nextButton']");
 
-  return {
-    isNextEnabled: !/bc-button-disabled/.test(nextButton.className),
-    nextUrl: nextButton.querySelector('a').getAttribute('href'),
-    books: owned,
-  };
+    return {
+      isNextEnabled: !/bc-button-disabled/.test(nextButton.className),
+      nextUrl: nextButton.querySelector('a').getAttribute('href'),
+      books: owned,
+    };
+  } catch (e) {
+    if (/failed to fetch/i.test((e as Error).message)) {
+      chrome.notifications.create('login', {
+        type: 'basic',
+        title: 'Audible Series Follower',
+        message: 'Please log back into Audible to continue to get updates',
+        iconUrl: 'favicon-32x32.png',
+      });
+    }
+    throw e;
+  }
 };
 
 function extractOwnedBook(element: HTMLElement): Book | null {

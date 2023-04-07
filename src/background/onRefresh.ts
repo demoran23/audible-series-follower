@@ -5,7 +5,6 @@ import {
   flatten,
   groupBy,
   keyBy,
-  keys,
   merge,
   omit,
   uniq,
@@ -23,7 +22,6 @@ import {
 } from 'services/storage';
 import { Book } from 'store/books';
 import { Following } from 'store/following';
-import { IType } from 'store/IType';
 import { Series } from 'store/series';
 
 export const onRefresh: ExtensionMessageEventHandler = (
@@ -166,7 +164,7 @@ export const refreshBooks = async () => {
     }
 
     const seriesBooks = keyBy(
-      flatten(seriesBooksList).map((b) => merge({}, b, storageBooks[b.id])),
+      flatten(seriesBooksList).map((b) => merge({}, storageBooks[b.id], b)),
       'id',
     ) as { [k: string]: Book };
 

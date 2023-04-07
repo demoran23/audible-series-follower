@@ -1,6 +1,5 @@
-import { Star, Stars } from '@suid/icons-material';
+import { Star } from '@suid/icons-material';
 import {
-  Button,
   Card,
   CardContent,
   CardMedia,
@@ -9,7 +8,7 @@ import {
   Stack,
   Typography,
 } from '@suid/material';
-import { green } from '@suid/material/colors';
+import { yellow } from '@suid/material/colors';
 import { ToggleFollowButton } from 'components/ToggleFollowButton';
 import { isArray, orderBy, values } from 'lodash';
 import { getOptions } from 'services/options';
@@ -86,12 +85,13 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
         <Grid container width={'600px'} spacing={1}>
           <For each={seriesBooks()}>
             {(book, index) => (
-              <Grid container data-index={index()}>
+              <Grid container data-index={index()} spacing={3}>
                 <Grid item xs={2}>
                   <Show when={book.rating}>
                     <Chip
-                      // color={getStarColorFromRating(book.rating)}
-                      icon={<Star />}
+                      icon={<Star sx={{ color: yellow[500] }} />}
+                      size={'small'}
+                      variant="outlined"
                       label={book.rating}
                     ></Chip>
                   </Show>
@@ -118,9 +118,13 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
                 </Grid>
                 <Grid item xs={7}>
                   <Typography
-                    sx={{ display: 'flex', alignItems: 'center' }}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
                     variant={'body2'}
                     noWrap
+                    title={book.title}
                   >
                     {book.title}
                   </Typography>

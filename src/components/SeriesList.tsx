@@ -1,9 +1,7 @@
 import { Box } from '@suid/material';
-import { BookCard } from 'components/BookCard';
 import { SeriesCard } from 'components/SeriesCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
-import { books } from 'store/books';
 import { followingStore } from 'store/following';
 import { series } from 'store/series';
 import { titleFilter } from 'store/titleFilter';

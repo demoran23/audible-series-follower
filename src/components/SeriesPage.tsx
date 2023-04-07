@@ -1,4 +1,3 @@
-import { BooksList } from 'components/BooksList';
 import { SeriesList } from 'components/SeriesList';
 import { Component } from 'solid-js';
 

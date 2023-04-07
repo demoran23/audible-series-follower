@@ -1,5 +1,5 @@
 import { ToggleFollowButton } from 'components/ToggleFollowButton';
-import { isEqual, keyBy, values } from 'lodash';
+import { keyBy, values } from 'lodash';
 import { getSeriesBooksFromDocument } from 'services/audible';
 import {
   getFollowingsFromStorage,

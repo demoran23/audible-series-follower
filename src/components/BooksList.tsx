@@ -4,7 +4,6 @@ import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
 import { followingStore } from 'store/following';
-import { series } from 'store/series';
 import { titleFilter } from 'store/titleFilter';
 
 export const BooksList: Component = () => {

@@ -1,7 +1,7 @@
 import { Button } from '@suid/material';
 import { Component, createMemo } from 'solid-js';
 import { followingStore, setFollowing } from 'store/following';
-import { Series, setSeries } from 'store/series';
+import { Series } from 'store/series';
 
 export const ToggleFollowButton: Component<{ series: Series }> = ({
   series,
