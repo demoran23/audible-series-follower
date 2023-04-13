@@ -1,12 +1,13 @@
 import { Box } from '@suid/material';
 import { BookCard } from 'components/BookCard';
+import { subDays } from 'date-fns';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
 import { books } from 'store/books';
 import { followingStore } from 'store/following';
 import { titleFilter } from 'store/titleFilter';
 
-export const BooksList: Component = () => {
+export const UpcomingList: Component = () => {
   const items = createMemo(
     () =>
       orderBy(
@@ -19,7 +20,10 @@ export const BooksList: Component = () => {
                 .some((title) => new RegExp(titleFilter()!, 'i').test(title!)),
           )
           .filter((b) => followingStore[b.seriesId ?? '']?.following)
-          .filter((b) => b.releaseDate && new Date(b.releaseDate) > new Date()),
+          .filter(
+            (b) =>
+              b.releaseDate && new Date(b.releaseDate) > subDays(new Date(), 1),
+          ),
         ['releaseDate'],
         'asc',
       ),

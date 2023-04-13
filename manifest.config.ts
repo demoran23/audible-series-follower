@@ -36,5 +36,5 @@ export default defineManifest(async (env) => ({
   name: 'Audible Series Follower',
   options_page: 'options_page.html',
   permissions: ['storage', 'alarms', 'notifications', 'tabs'],
-  version: '1.0',
+  version: `${major}.${minor}.${patch}`,
 }));

@@ -25,6 +25,29 @@ New series will be automatically followed if they have a book within the past 5 
 ### Options
 You can set the Audible base url (eg https://www.audible.com) in the extension options.
 
+# Troubleshooting
+Chrome extensions consist of two parts: the background stuff, and the browser stuff.
+The developer console should show everything for both of them.
+
+## The background stuff
+The background is where we talk to Audible so we can know about your books.
+We'll store your books and series data in `chrome.storage.local`.
+Clearing this will cause us to get all of your books and series info again.
+
+We store what you're following in `chrome.storage.sync`, which can travel between computers.
+
+To see the developer tools console for the background stuff, right-click on the extension icon and
+select "Manage Extension", then click on *Inspect Views > service worker*.
+
+## The browser stuff
+The browser is where we show you the data we got in the background.
+This is where the "Upcoming", "Series", and "Others" tabs live.
+
+To see info about the browser stuff, you'll want the Console, Network, and Elements tabs in the developer tools.
+
+## Restarting the extension
+You can restart the extension from the Chrome Extensions page: chrome://extensions/.
+
 # How does it work?
 
 Every 24 hours, the extension will attempt to get the series information from Audible without doing any extra authentication.

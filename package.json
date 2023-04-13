@@ -17,6 +17,7 @@
     "eslint-plugin-solid": "0.9.1",
     "fast-xml-parser": "4.0.12",
     "archiver": "5.3.1",
+    "limiter": "2.1.0",
     "linkedom": "0.14.21",
     "lodash": "4.17.21",
     "prettier": "2.8.1",
@@ -38,5 +39,5 @@
     "lint": "eslint src/."
   },
   "type": "module",
-  "version": "0.0.1"
+  "version": "1.1.0"
 }

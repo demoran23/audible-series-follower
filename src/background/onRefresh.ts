@@ -1,5 +1,5 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
-import { subYears } from 'date-fns';
+import { isToday, subYears } from 'date-fns';
 import {
   chunk,
   flatten,
@@ -23,6 +23,9 @@ import {
 import { Book } from 'store/books';
 import { Following } from 'store/following';
 import { Series } from 'store/series';
+import { RateLimiter } from 'limiter';
+
+const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 export const onRefresh: ExtensionMessageEventHandler = (
   msg,
@@ -47,6 +50,24 @@ export const onInitialize: ExtensionMessageEventHandler = (
   return true;
 };
 
+const notifyOnReleasedBooks = async () => {
+  const books = await getBooksFromStorage();
+  const options = await getOptions();
+
+  const justReleased = books
+    .filter((b) => b.releaseDate)
+    .filter((b) => isToday(new Date(b.releaseDate)));
+
+  for (const book of justReleased) {
+    chrome.notifications.create(`released:${book.id}`, {
+      type: 'basic',
+      message: `${book.title} will release today!`,
+      iconUrl: `${book.imageUrl}`,
+      title: `Audible Series Follower`,
+    });
+  }
+};
+
 export const refreshBooks = async () => {
   let storageBooks = await getBooksFromStorage();
   const options = await getOptions();
@@ -57,6 +78,7 @@ export const refreshBooks = async () => {
 
   const ownedBooks: Book[] = [];
   do {
+    await limiter.removeTokens(1);
     const result = await getOwnedBooks(url);
     console.log('result', result);
     shouldContinue = result.isNextEnabled;
@@ -68,13 +90,16 @@ export const refreshBooks = async () => {
     if (storageBooks.some((b) => result.books.some((r) => r.id === b.id)))
       break;
   } while (shouldContinue);
+
   await setBooksInStorage(ownedBooks);
   storageBooks = await getBooksFromStorage();
+
   const existingBooksWithSeries = storageBooks.filter(
     (b) => b.seriesId,
   ) as Book[];
   let storageSeries = await getSeriesFromStorage();
   // Seed new series
+
   const bookSeriesGroup = groupBy(existingBooksWithSeries, 'seriesId');
   for (const seriesId in bookSeriesGroup) {
     // If we've already added this series, don't bother
@@ -111,6 +136,7 @@ export const refreshBooks = async () => {
   storageSeries = await getSeriesFromStorage();
   const newFollowings: Following[] = [];
   for (const chunk of chunks) {
+    await limiter.removeTokens(10);
     const results = await Promise.allSettled(chunk.map(getSeriesBooks));
     const seriesBooksList = results
       .filter((r) => r.status === 'fulfilled')
@@ -175,7 +201,7 @@ export const refreshBooks = async () => {
     for (const book of values(newlySeenBooks)
       .filter(Boolean)
       .filter((b) => new Date() < new Date(b.releaseDate))) {
-      chrome.notifications.create(book.id, {
+      chrome.notifications.create(`new:${book.id}`, {
         type: 'basic',
         title: `A new audiobook is available in the ${book.seriesName} series.`,
         iconUrl: `${book.imageUrl}`,

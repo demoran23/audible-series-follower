@@ -7,7 +7,7 @@ import {
   ToggleButtonGroup,
 } from '@suid/material';
 import { InputProps as StandardInputProps } from '@suid/material/Input/InputProps';
-import { BooksPage } from 'components/BooksPage';
+import { UpcomingPage } from 'components/UpcomingPage';
 import { SeriesPage } from 'components/SeriesPage';
 import { createSignal, Match, Switch } from 'solid-js';
 import type { Component } from 'solid-js';
@@ -53,7 +53,7 @@ const App: Component = () => {
           sx={{ backgroundColor: 'white' }}
         />
       </Stack>
-      <Switch fallback={<BooksPage />}>
+      <Switch fallback={<UpcomingPage />}>
         <Match when={page() === 'followed'} keyed>
           <SeriesPage following={true} />
         </Match>

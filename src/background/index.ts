@@ -15,8 +15,12 @@ chrome.notifications.onClicked.addListener((id) => {
   getOptions().then((o) => {
     if (id === 'login') {
       chrome.tabs.create({ url: `${o.audibleBaseUrl}/library/titles` });
-    } else {
-      chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${id}` });
+    } else if (/^newbook:(.+)/.test(id)) {
+      const asin = /^new:(.+)/[Symbol.match](id)![1];
+      chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${asin}` });
+    } else if (/^released:(.+)/.test(id)) {
+      const asin = /^released:(.+)/[Symbol.match](id)![1];
+      chrome.tabs.create({ url: `${o.audibleBaseUrl}/pd/${asin}` });
     }
   });
   return true;
