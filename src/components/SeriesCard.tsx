@@ -1,10 +1,11 @@
-import { Star } from '@suid/icons-material';
+import { ManageSearch, Search, Star } from '@suid/icons-material';
 import {
   Card,
   CardContent,
   CardMedia,
   Chip,
   Grid,
+  IconButton,
   Stack,
   Typography,
 } from '@suid/material';
@@ -66,19 +67,35 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
           justifyContent={'space-between'}
           marginBottom={'1em'}
         >
-          <a
-            href={`${options()?.audibleBaseUrl}/series/${series.id}`}
-            target={'_blank'}
-          >
-            <Typography
-              variant="subtitle1"
-              title={series.name}
-              noWrap
-              sx={{ fontWeight: 'bold' }}
+          <Stack direction={'row'}>
+            <a
+              href={`${options()?.audibleBaseUrl}/series/${series.id}`}
+              target={'_blank'}
             >
-              {series.name}
-            </Typography>
-          </a>
+              <Typography
+                variant="subtitle1"
+                title={series.name}
+                noWrap
+                sx={{ fontWeight: 'bold' }}
+              >
+                {series.name}
+              </Typography>
+            </a>
+            <IconButton
+              title={'Search your library'}
+              onClick={() =>
+                chrome.tabs.create({
+                  url: `${
+                    options()?.audibleBaseUrl
+                  }/library/titles?searchTerm=${series.name}`,
+                })
+              }
+              size={'small'}
+              sx={{ marginLeft: '1em' }}
+            >
+              <ManageSearch />
+            </IconButton>
+          </Stack>
           <ToggleFollowButton series={series} />
         </Stack>
 
