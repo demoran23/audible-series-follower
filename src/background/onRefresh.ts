@@ -1,4 +1,5 @@
 import { ExtensionMessageEventHandler } from 'background/ExtensionMessageEventHandler';
+import { limiter } from 'background/limiter';
 import { isToday, subYears } from 'date-fns';
 import {
   chunk,
@@ -23,9 +24,6 @@ import {
 import { Book } from 'store/books';
 import { Following } from 'store/following';
 import { Series } from 'store/series';
-import { RateLimiter } from 'limiter';
-
-const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' });
 
 export const onRefresh: ExtensionMessageEventHandler = (
   msg,
@@ -34,10 +32,12 @@ export const onRefresh: ExtensionMessageEventHandler = (
 ) => {
   if (msg.type !== 'refresh') return false;
 
+  notifyOnReleasedBooks().catch(console.error);
   refreshBooks().then(sendResponse).catch(console.error);
 
   return true;
 };
+
 export const onInitialize: ExtensionMessageEventHandler = (
   msg,
   _,
@@ -50,9 +50,8 @@ export const onInitialize: ExtensionMessageEventHandler = (
   return true;
 };
 
-const notifyOnReleasedBooks = async () => {
+export const notifyOnReleasedBooks = async () => {
   const books = await getBooksFromStorage();
-  const options = await getOptions();
 
   const justReleased = books
     .filter((b) => b.releaseDate)
@@ -78,7 +77,6 @@ export const refreshBooks = async () => {
 
   const ownedBooks: Book[] = [];
   do {
-    await limiter.removeTokens(1);
     const result = await getOwnedBooks(url);
     console.log('result', result);
     shouldContinue = result.isNextEnabled;
@@ -132,11 +130,11 @@ export const refreshBooks = async () => {
       .filter(Boolean),
   );
 
-  const chunks = chunk(seriesAsins, 10);
+  const chunks = chunk(seriesAsins, 5);
   storageSeries = await getSeriesFromStorage();
   const newFollowings: Following[] = [];
   for (const chunk of chunks) {
-    await limiter.removeTokens(10);
+    await limiter.removeTokens(5);
     const results = await Promise.allSettled(chunk.map(getSeriesBooks));
     const seriesBooksList = results
       .filter((r) => r.status === 'fulfilled')
@@ -222,6 +220,7 @@ export interface Storage {
   series: { [key: string]: Series };
   following: { [key: string]: Following };
 }
+
 export const getStorage = async () => {
   const books = keyBy(await getBooksFromStorage(), 'id');
   const series = keyBy(await getSeriesFromStorage(), `id`);

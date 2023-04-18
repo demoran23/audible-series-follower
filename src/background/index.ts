@@ -33,6 +33,6 @@ chrome.alarms.create({ periodInMinutes: 60 * 24 });
 chrome.alarms.create({ when: Date.now() });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  refreshBooks().catch(console.error);
+  onRefresh({ type: 'refresh', data: null }, null as any, console.log);
   return true;
 });

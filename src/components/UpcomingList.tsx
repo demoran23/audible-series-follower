@@ -22,7 +22,7 @@ export const UpcomingList: Component = () => {
           .filter((b) => followingStore[b.seriesId ?? '']?.following)
           .filter(
             (b) =>
-              b.releaseDate && new Date(b.releaseDate) > subDays(new Date(), 1),
+              b.releaseDate && new Date(b.releaseDate) > subDays(new Date(), 2),
           ),
         ['releaseDate'],
         'asc',

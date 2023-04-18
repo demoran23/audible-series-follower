@@ -12,7 +12,7 @@ export interface Book extends IType<'book'> {
   seriesId: string | undefined | null;
   seriesName: string | undefined | null;
   rating: number | undefined | null;
-  status: 'owned' | 'wishlisted' | 'preordered' | undefined;
+  status: 'owned' | 'wishlisted' | 'preordered' | 'read' | undefined;
 
   // iso date
   releaseDate: string;

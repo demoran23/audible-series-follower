@@ -1,3 +1,4 @@
+import { limiter } from 'background/limiter';
 import { trim } from 'lodash';
 import { getOptions } from 'services/options';
 import { getBooksFromStorage } from 'services/storage';
@@ -13,6 +14,7 @@ export interface OwnedBooksResult {
 }
 export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
   try {
+    await limiter.removeTokens(1);
     const res = await fetch(url);
     const html = await res.text();
     const document = parser.parseFromString(html, 'text/html');
@@ -45,8 +47,12 @@ export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
 
 function extractOwnedBook(element: HTMLElement): Book | null {
   const book: Partial<Book> = {};
-  book.status = 'owned';
-
+  const isFinished =
+    element
+      .querySelector<HTMLSpanElement>("span[id*='time-remaining-finished']")
+      ?.innerText?.trim()
+      ?.toLowerCase() === 'finished';
+  book.status = isFinished ? 'read' : 'owned';
   const id = element
     .querySelector("div[asin][class*='bc-rating-stars']")
     ?.getAttribute('asin');
@@ -94,6 +100,8 @@ export const getSeriesBooks = async (asin: string): Promise<Book[]> => {
   try {
     const options = await getOptions();
     const url = `${options.audibleBaseUrl}/series/${asin}`;
+
+    await limiter.removeTokens(1);
     const res = await fetch(url);
     if (res.status >= 300) {
       console.warn('FAILED to fetch series', asin);

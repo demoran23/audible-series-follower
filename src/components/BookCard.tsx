@@ -25,7 +25,7 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
   const releasesIn =
     book.releaseDate &&
     formatDistance(new Date(book.releaseDate), Date.now(), {
-      // addSuffix: true,
+      addSuffix: true,
     });
   const isFollowing = !!followingStore[book.seriesId!]?.following;
   const [options] = createResource(getOptions);
