@@ -63,11 +63,11 @@ export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
 
 function extractOwnedBook(element: HTMLElement): Book | null {
   const book: Partial<Book> = {};
+  const timeRemainingFinishedValue = element.querySelector<HTMLSpanElement>(
+    "span:not(.bc-pub-hidden)[id*='time-remaining-finished']",
+  )?.innerText;
   const isFinished =
-    element
-      .querySelector<HTMLSpanElement>("span[id*='time-remaining-finished']")
-      ?.innerText?.trim()
-      ?.toLowerCase() === 'finished';
+    timeRemainingFinishedValue?.trim()?.toLowerCase() === 'finished';
   book.status = isFinished ? 'read' : 'owned';
   const id = element
     .querySelector("div[asin][class*='bc-rating-stars']")
