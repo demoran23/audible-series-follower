@@ -7,11 +7,27 @@ import { DOMParser } from 'linkedom';
 import { parse as parseDate } from 'date-fns';
 
 const parser = new DOMParser();
+
 export interface OwnedBooksResult {
   nextUrl: string;
   isNextEnabled: boolean;
   books: Book[];
 }
+
+export const getListenedToSeriesIds = async () => {
+  await limiter.removeTokens(1);
+  const options = await getOptions();
+  const url = `${options.audibleBaseUrl}/account/listen-history`;
+  const res = await fetch(url);
+  const html = await res.text();
+  const document = parser.parseFromString(html, 'text/html');
+  const bookIds = document
+    .querySelectorAll("input[name='asin']")
+    .map((el) => el.getAttribute('value') as string);
+  const books = await getBooksFromStorage(bookIds);
+  return books.map((b) => b.seriesId).filter(Boolean) as string[];
+};
+
 export const getOwnedBooks = async (url: URL): Promise<OwnedBooksResult> => {
   try {
     await limiter.removeTokens(1);
@@ -136,6 +152,7 @@ export async function getSeriesBooksFromDocument(
 
   return books;
 }
+
 async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
   const id = element.querySelector('div[data-asin]')?.getAttribute('data-asin');
   if (!id || id === 'id') {

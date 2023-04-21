@@ -11,7 +11,11 @@ import {
   uniq,
   values,
 } from 'lodash';
-import { getOwnedBooks, getSeriesBooks } from 'services/audible';
+import {
+  getListenedToSeriesIds,
+  getOwnedBooks,
+  getSeriesBooks,
+} from 'services/audible';
 import { getOptions } from 'services/options';
 import {
   getBooksFromStorage,
@@ -118,17 +122,17 @@ export const refreshBooks = async () => {
 
   // Get the series books
   const following = await getFollowingsFromStorage();
-  const seriesAsins = uniq(
-    storageBooks
+  const seriesAsins = uniq([
+    ...(storageBooks
       .filter(
         (b) =>
           // Series that are either followed or don't have a following set yet
           following.find((f) => f.seriesId === b.seriesId)?.following !== false,
       )
-      .filter((b) => b.seriesId)
-      .map((b) => b.seriesId!)
-      .filter(Boolean),
-  );
+      .map((b) => b.seriesId)
+      .filter(Boolean) as string[]),
+    ...(await getListenedToSeriesIds()),
+  ]);
 
   const chunks = chunk(seriesAsins, 5);
   storageSeries = await getSeriesFromStorage();
