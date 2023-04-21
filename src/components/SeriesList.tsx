@@ -1,4 +1,4 @@
-import { Box } from '@suid/material';
+import { Box, Stack } from '@suid/material';
 import { SeriesCard } from 'components/SeriesCard';
 import { orderBy, values } from 'lodash';
 import { Component, createMemo, For } from 'solid-js';
@@ -25,17 +25,10 @@ export const SeriesList: Component<{ following: boolean }> = (props) => {
     [],
   );
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        minWidth: 775,
-      }}
-    >
+    <Stack direction={'row'} flexWrap={'wrap'} justifyContent={'center'}>
       <For each={items()}>
         {(item, index) => <SeriesCard series={item} data-index={index()} />}
       </For>
-    </Box>
+    </Stack>
   );
 };

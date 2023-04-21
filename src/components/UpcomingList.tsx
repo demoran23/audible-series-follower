@@ -1,4 +1,4 @@
-import { Box } from '@suid/material';
+import { Box, Stack } from '@suid/material';
 import { BookCard } from 'components/BookCard';
 import { subDays } from 'date-fns';
 import { orderBy, values } from 'lodash';
@@ -31,17 +31,10 @@ export const UpcomingList: Component = () => {
   );
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        minWidth: 775,
-      }}
-    >
+    <Stack direction={'row'} flexWrap={'wrap'} justifyContent={'center'}>
       <For each={items()}>
         {(item, index) => <BookCard book={item} data-index={index()} />}
       </For>
-    </Box>
+    </Stack>
   );
 };

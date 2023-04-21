@@ -1,3 +1,4 @@
+import { onClear } from 'background/onClear';
 import { onInitialize, onRefresh, refreshBooks } from 'background/onRefresh';
 import { onShowApp } from 'background/onShowApp';
 import { getOptions } from 'services/options';
@@ -6,7 +7,7 @@ for (const onMessage of [
   chrome.runtime.onMessageExternal,
   chrome.runtime.onMessage,
 ]) {
-  for (const listener of [onShowApp, onRefresh, onInitialize]) {
+  for (const listener of [onShowApp, onRefresh, onInitialize, onClear]) {
     onMessage.addListener(listener);
   }
 }

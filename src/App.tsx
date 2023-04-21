@@ -1,6 +1,9 @@
+import { OpenInNew, Refresh } from '@suid/icons-material';
 import {
   Box,
+  CircularProgress,
   Container,
+  IconButton,
   Stack,
   TextField,
   ToggleButton,
@@ -9,7 +12,7 @@ import {
 import { InputProps as StandardInputProps } from '@suid/material/Input/InputProps';
 import { UpcomingPage } from 'components/UpcomingPage';
 import { SeriesPage } from 'components/SeriesPage';
-import { createSignal, Match, Switch } from 'solid-js';
+import { createSignal, Match, Show, Switch } from 'solid-js';
 import type { Component } from 'solid-js';
 import { setTitleFilter, titleFilter } from 'store/titleFilter';
 
@@ -17,11 +20,21 @@ type AppPage = 'upcoming' | 'followed' | 'others';
 
 const App: Component = () => {
   const [page, setPage] = createSignal<AppPage>('upcoming');
+  const [refreshing, setRefreshing] = createSignal(false);
   const onFilterChange: StandardInputProps['onChange'] = (e, value) => {
     setTitleFilter(value);
   };
   return (
-    <Box>
+    <Stack
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        minWidth: 750,
+        marginLeft: '1em',
+        marginRight: '1em',
+      }}
+    >
       <Stack
         direction={'row'}
         alignItems={'flex-start'}
@@ -39,9 +52,15 @@ const App: Component = () => {
           }}
           sx={{ backgroundColor: 'white' }}
         >
-          <ToggleButton value="upcoming">Upcoming</ToggleButton>
-          <ToggleButton value="followed">Followed</ToggleButton>
-          <ToggleButton value="others">Others</ToggleButton>
+          <ToggleButton title={'Upcoming books'} value="upcoming">
+            Upcoming
+          </ToggleButton>
+          <ToggleButton title={'Followed series'} value="followed">
+            Followed
+          </ToggleButton>
+          <ToggleButton title={'Other series'} value="others">
+            Others
+          </ToggleButton>
         </ToggleButtonGroup>
         <TextField
           label="Search"
@@ -50,8 +69,36 @@ const App: Component = () => {
           size={'small'}
           value={titleFilter()}
           onChange={onFilterChange}
-          sx={{ backgroundColor: 'white' }}
+          sx={{
+            backgroundColor: 'white',
+            flex: 1,
+            marginLeft: '2em',
+            marginRight: '2em',
+          }}
         />
+        <Stack direction={'row'}>
+          <IconButton
+            title={'Refresh'}
+            onClick={async () => {
+              try {
+                setRefreshing(true);
+                await chrome.runtime.sendMessage({ type: 'refresh' });
+              } finally {
+                setRefreshing(false);
+              }
+            }}
+          >
+            <Show when={refreshing()} fallback={<Refresh />}>
+              <CircularProgress />
+            </Show>
+          </IconButton>
+          <IconButton
+            title={'Open in new tab'}
+            onClick={() => chrome.runtime.sendMessage({ type: 'show-app' })}
+          >
+            <OpenInNew />
+          </IconButton>
+        </Stack>
       </Stack>
       <Switch fallback={<UpcomingPage />}>
         <Match when={page() === 'followed'} keyed>
@@ -61,7 +108,7 @@ const App: Component = () => {
           <SeriesPage following={false} />
         </Match>
       </Switch>
-    </Box>
+    </Stack>
   );
 };
 

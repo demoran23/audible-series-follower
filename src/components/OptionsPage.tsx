@@ -1,4 +1,4 @@
-import { Box, Stack, TextField } from '@suid/material';
+import { Box, Button, Stack, TextField } from '@suid/material';
 import { getOptions, IOptions, setOptions } from 'services/options';
 import {
   Component,
@@ -41,6 +41,14 @@ export const OptionsPage: Component = () => {
               value={options()?.audibleBaseUrl}
               onChange={onChange}
             />
+            <Button
+              title={
+                'Clears all of your books and series.  Follows are retained.'
+              }
+              onClick={() => chrome.runtime.sendMessage({ type: 'clear' })}
+            >
+              CLEAR BOOKS
+            </Button>
           </Stack>
         </Box>
       </Match>
