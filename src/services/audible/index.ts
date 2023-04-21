@@ -137,12 +137,12 @@ export async function getSeriesBooksFromDocument(
   return books;
 }
 async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
-  const book: Partial<Book> = {};
-
   const id = element.querySelector('div[data-asin]')?.getAttribute('data-asin');
   if (!id || id === 'id') {
     return null;
   }
+  const book: Partial<Book> = (await getBooksFromStorage([id]))[0] ?? {};
+
   book.id = id;
   book.title = trim(
     element.querySelector<HTMLDivElement>("li h3[class*='bc-heading'] a")!
@@ -172,9 +172,7 @@ async function extractSeriesBook(element: HTMLElement): Promise<Book | null> {
     ).toISOString();
   }
 
-  if (element.querySelector('span:not(.bc-hidden).adblBuyBoxInLibraryButton')) {
-    book.status = 'owned';
-  } else if (
+  if (
     /in wish list/i.test(
       element.querySelector<HTMLElement>(
         'span:not(.bc-hidden).adblGoToWishlistButton',
