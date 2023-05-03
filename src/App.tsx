@@ -10,13 +10,14 @@ import {
   ToggleButtonGroup,
 } from '@suid/material';
 import { InputProps as StandardInputProps } from '@suid/material/Input/InputProps';
+import { NextPage } from 'components/NextPage';
 import { UpcomingPage } from 'components/UpcomingPage';
 import { SeriesPage } from 'components/SeriesPage';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import type { Component } from 'solid-js';
 import { setTitleFilter, titleFilter } from 'store/titleFilter';
 
-type AppPage = 'upcoming' | 'followed' | 'others';
+type AppPage = 'upcoming' | 'followed' | 'others' | 'next';
 
 const App: Component = () => {
   const [page, setPage] = createSignal<AppPage>('upcoming');
@@ -54,6 +55,9 @@ const App: Component = () => {
         >
           <ToggleButton title={'Upcoming books'} value="upcoming">
             Upcoming
+          </ToggleButton>
+          <ToggleButton title={'Next books'} value="next">
+            Next
           </ToggleButton>
           <ToggleButton title={'Followed series'} value="followed">
             Followed
@@ -103,6 +107,9 @@ const App: Component = () => {
       <Switch fallback={<UpcomingPage />}>
         <Match when={page() === 'followed'} keyed>
           <SeriesPage following={true} />
+        </Match>
+        <Match when={page() === 'next'} keyed>
+          <NextPage />
         </Match>
         <Match when={page() === 'others'} keyed>
           <SeriesPage following={false} />

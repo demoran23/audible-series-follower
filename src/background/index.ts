@@ -27,8 +27,8 @@ chrome.notifications.onClicked.addListener((id) => {
   return true;
 });
 
-// Refresh data every day
-chrome.alarms.create({ periodInMinutes: 60 * 24 });
+// Refresh data every 6 hours
+chrome.alarms.create({ periodInMinutes: 60 * 6 });
 
 // Run when extension starts
 chrome.alarms.create({ when: Date.now() });
