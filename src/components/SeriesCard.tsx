@@ -96,7 +96,7 @@ export const SeriesCard: Component<SeriesCardProps> = ({ series }) => {
               <ManageSearch />
             </IconButton>
           </Stack>
-          <ToggleFollowButton series={series} />
+          <ToggleFollowButton seriesId={series.id} />
         </Stack>
 
         <Grid container width={'600px'} rowSpacing={1}>

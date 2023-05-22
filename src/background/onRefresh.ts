@@ -86,11 +86,6 @@ export const refreshBooks = async () => {
     shouldContinue = result.isNextEnabled;
     url = new URL(`${url.origin}${result.nextUrl}`);
     ownedBooks.push(...result.books);
-
-    // If we already have the last book that was returned, don't bother asking for more,
-    // since they're chronologically ordered on the page
-    if (storageBooks.some((b) => result.books.some((r) => r.id === b.id)))
-      break;
   } while (shouldContinue);
 
   await setBooksInStorage(ownedBooks);

@@ -45,7 +45,7 @@ if (parent) {
     await setBooksInStorage(books);
   }
 
-  render(() => <ToggleFollowButton series={series!} />, mountPoint);
+  render(() => <ToggleFollowButton seriesId={series!.id} />, mountPoint);
   parent.append(mountPoint);
 }
 

@@ -1,26 +1,32 @@
-import { Cancel } from '@suid/icons-material';
+import { Cancel, LibraryBooks, ManageSearch } from '@suid/icons-material';
 import {
   Card,
   CardContent,
   CardMedia,
   Checkbox,
   Chip,
+  Icon,
+  IconButton,
   Stack,
+  SvgIcon,
   Typography,
 } from '@suid/material';
 import { SwitchBaseProps } from '@suid/material/internal/SwitchBaseProps';
+import { ToggleFollowButton } from 'components/ToggleFollowButton';
 import { getOptions } from 'services/options';
 import { Component, createResource, Show } from 'solid-js';
 import { produce } from 'solid-js/store';
 import { Book } from 'store/books';
 import { formatDistance } from 'date-fns';
 import { followingStore, setFollowing } from 'store/following';
-
+import AudibleIcon from 'assets/audible.svg';
 export interface BookCardProps {
   book: Book;
 }
 const cardPadding = 16;
-const width = 300 - cardPadding * 2;
+const imageMaxWidth = 300;
+const cardMaxWidth = 700;
+const noWrapSize = cardMaxWidth - imageMaxWidth;
 export const BookCard: Component<BookCardProps> = ({ book }) => {
   const releasesIn =
     book.releaseDate &&
@@ -36,62 +42,85 @@ export const BookCard: Component<BookCardProps> = ({ book }) => {
       }),
     );
   };
+  const bookLink = () => `${options()?.audibleBaseUrl}/pd/${book.id}`;
   return (
     <Card
       sx={{
         display: 'flex',
-        margin: 1,
-        maxWidth: 300,
+        maxWidth: cardMaxWidth,
+        margin: '1em',
       }}
     >
-      <CardContent sx={{ flex: '1 0 auto' }}>
-        <a
-          href={`${options()?.audibleBaseUrl}/pd/${book.id}`}
-          target={'_blank'}
-        >
-          <CardMedia
-            component="img"
-            sx={{ maxWidth: width }}
-            image={book.imageUrl}
-            alt={book.title}
-          />
+      <a href={bookLink()} target={'_blank'}>
+        <CardMedia component="img" image={book.imageUrl} alt={book.title} />
+      </a>
+      <CardContent
+        sx={{
+          flex: '1 0 auto',
+          flexDirection: 'row',
+          paddingTop: '0px',
+          paddingBottom: '0px',
+        }}
+      >
+        <Stack>
           <Typography
             variant="subtitle1"
             title={book.title}
             noWrap
-            sx={{ inlineSize: width, fontWeight: 'bold' }}
+            sx={{ inlineSize: noWrapSize, fontWeight: 'bold' }}
           >
             {book.title}
           </Typography>
-        </a>
+          <Typography variant={'body2'}>{releasesIn}</Typography>
 
-        <Typography variant={'body2'}>{releasesIn}</Typography>
-
-        <Show when={book.seriesName}>
-          <Typography
-            variant="body2"
-            title={book.seriesName!}
-            noWrap
-            sx={{ inlineSize: width }}
-          >
-            {book.seriesName}
-          </Typography>
-        </Show>
-        <Stack
-          direction={'row'}
-          justifyContent={'space-between'}
-          alignItems={'center'}
-          maxWidth={width}
-        >
-          <Show when={book.status} fallback={<span></span>}>
-            <Chip label={book.status} />
+          <Show when={book.seriesName}>
+            <Stack direction="row">
+              <Typography
+                variant="body2"
+                title={`${book.seriesName} #${book.number}`}
+                noWrap
+                sx={{ inlineSize: noWrapSize }}
+              >
+                {book.seriesName} #{book.number}
+              </Typography>
+              <IconButton
+                title={'Search your library'}
+                onClick={() =>
+                  chrome.tabs.create({
+                    url: `${
+                      options()?.audibleBaseUrl
+                    }/library/titles?searchTerm=${book.seriesName}`,
+                  })
+                }
+                size={'small'}
+                sx={{ marginLeft: '1em' }}
+              >
+                <ManageSearch />
+              </IconButton>
+              <IconButton
+                title={'Go to series'}
+                onClick={() =>
+                  chrome.tabs.create({
+                    url: `${options()?.audibleBaseUrl}/series/${book.seriesId}`,
+                  })
+                }
+                size={'small'}
+                sx={{ marginLeft: '1em' }}
+              >
+                <LibraryBooks />
+              </IconButton>
+            </Stack>
           </Show>
-          <Checkbox
-            checked={isFollowing}
-            title={'Stop following this series'}
-            onChange={onRemoveFollowClick}
-            checkedIcon={<Cancel color={'error'} />}
-          />
+          <Stack
+            direction={'row'}
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
+            <Show when={book.status} fallback={<span></span>}>
+              <Chip label={book.status} />
+            </Show>
+            <ToggleFollowButton seriesId={book.seriesId!} />
+          </Stack>
         </Stack>
       </CardContent>
     </Card>

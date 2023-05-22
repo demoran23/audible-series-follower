@@ -16,6 +16,7 @@ export const NextList: Component<{ owned: boolean }> = (props) => {
             first(orderBy(seriesBooks, 'number').filter((b) => !b.rating)),
           )
           .filter(Boolean)
+          .filter((b) => Number.isInteger(b?.number))
           .filter((b) => !props.owned || b?.status === 'owned')
           .filter(
             (b) =>

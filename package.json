@@ -34,6 +34,7 @@
   "proxy": "http://localhost:3000/",
   "scripts": {
     "start": "vite --host",
+    "dev": "vite build -w",
     "serve": "vite preview",
     "build": "tsc --noEmit && vite build",
     "lint": "eslint src/."

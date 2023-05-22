@@ -87,3 +87,6 @@ Now you're ready to start making changes!
 
 # Notes
 The icon was generated with https://favicon.io/favicon-generator/
+
+# Attributions
+Free Audible Icon by [Icon 54](https://iconscout.com/contributors/icon-54) on [IconScout](https://iconscout.com)
